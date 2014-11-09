@@ -12,25 +12,58 @@ using Microsoft.Xna.Framework.Media;
 namespace GameOfLife
 {
     /// <summary>
-    /// This is the main type for your game
+    /// This is the main type for the game
     /// </summary>
     public class GameOfLife : Microsoft.Xna.Framework.Game
     {
-        enum States { WAITINGFORINPUT, MOVING, EFFECTOFFIELD, ATFORK1, ATFORK2, ATFORK3, ATDECISION, QUITTING };
+        enum State { MAINMENU, INSTRUCTIONS, LOADGAME, NUMBEROFPLAYERS, COLLEGEORWORK,
+                     PLAYERSTURN, SAVEGAME, MOVING, CHOOSESTOCK, CHOOSEJOB, CHOOSESALARY,
+                     CHANGEJOB, ATFORK, TRADESALARY, TRADEWITHWHO, CHOOSERETIREMENT, QUITTING };
+
+        #region Variables for Update
+
+
+
+        private DataModel.DataModel model;
+
+        private State gameState;
+
+        private int arrowPosition;
+
+
+
+        #endregion
+        #region Variables for Draw
+
+
 
         GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
+        private SpriteBatch spriteBatch;
 
-        DataModel.DataModel model;
+        private Texture2D startGameBtn;
+        private Texture2D arrow;
 
-        States gameState;
-        int spinnedNumber;
+        private SpriteFont font;
+
+
+
+        #endregion
+        #region Constructor
+
+
 
         public GameOfLife()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
         }
+
+
+
+        #endregion
+        #region Initialize
+
+
 
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.
@@ -40,10 +73,18 @@ namespace GameOfLife
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+            arrowPosition = 0;
+            gameState = State.MAINMENU;
 
             base.Initialize();
         }
+
+
+
+        #endregion
+        #region LoadContent
+
+
 
         /// <summary>
         /// LoadContent will be called once per game and is the place to load
@@ -51,11 +92,20 @@ namespace GameOfLife
         /// </summary>
         protected override void LoadContent()
         {
-            // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
+            startGameBtn = Content.Load<Texture2D>("startgamebtn");
+            arrow = Content.Load<Texture2D>("arrow");
+
+            font = Content.Load<SpriteFont>("Instructions");
         }
+
+
+
+        #endregion
+        #region UnloadContent
+
+
 
         /// <summary>
         /// UnloadContent will be called once per game and is the place to unload
@@ -66,6 +116,13 @@ namespace GameOfLife
             // TODO: Unload any non ContentManager content here
         }
 
+
+
+        #endregion
+        #region Update
+
+
+
         /// <summary>
         /// Allows the game to run logic such as updating the world,
         /// checking for collisions, gathering input, and playing audio.
@@ -75,162 +132,52 @@ namespace GameOfLife
         {
             switch (gameState)
             {
-                case States.WAITINGFORINPUT:
-                {
-                    if (Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.P))
+                case State.MAINMENU:
+                    if (Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.Up))
                     {
-                        spinnedNumber = model.Spin(model.ActualPlayer);
-                        gameState = States.MOVING;
+                        arrowPosition = arrowPosition == 0 ? 3 : arrowPosition - 1;
                     }
-                    if (Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.O) /*&& !model.getHouseInsurance(model.getCurrentPlayer())*/)
+                    if (Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.Down))
                     {
-                        /* TODO buyHouseInsurance legyen int
-                         * 0 = sikeres
-                         * 1 = nincs pénzed
-                         * 2 = már van biztosításod
-                         */
-                        if (model.buyHouseInsurance(model.getCurrentPlayer()))
+                        arrowPosition = (arrowPosition + 1) % 4;
+                    }
+                    if (Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.Space))
+                    {
+                        switch (arrowPosition)
                         {
-                            cout << "biztosítás megvéve" << endl;
+                            case 0:
+                                //New game
+                                break;
+                            case 1:
+                                //Load game
+                                break;
+                            case 2:
+                                gameState = State.INSTRUCTIONS;
+                                break;
+                            default:
+                                //Quit
+                                break;
                         }
-                        else
-                        {
-                            cout << "már van biztosításod!" << endl;
-                        }
-                    }
-                    if (Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.J) /*&& !model.getCarInsurance(model.getCurrentPlayer())*/)
-                    {
-                        if (model.buyCarInsurance(model.getCurrentPlayer()))
-                        {
-                            cout << "biztosítás megvéve" << endl;
-                        }
-                        else
-                        {
-                            cout << "már van biztosításod!" << endl;
-                        }
-                    }
-                    if (Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.R) /*&& !model.getStock(model.getCurrentPlayer())*/) //TODO ez valójában egy lista
-                    {
-                        //TODO kirajzolni a részvényeket
-                        model.buyCarInsurance(model.getCurrentPlayer());
-                    }
-                    if (Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.F))
-                    {
-                        //TODO a hitel mindig 20.000
-                        model.getLoan(model.getCurrentPlayer());
-                        cout << "újabb hitel..." << endl;
-                    }
-                    if (Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.V))
-                    {
-                        if (model.payBackLoan(model.getCurrentPlayer()))
-                        {
-                            cout << "hitel visszafizetve" << endl;
-                        }
-                        else
-                        {
-                            cout << "nincs elég pénzed!" << endl;
-                        }
-                    }
-                    if (Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.M))
-                    {
-                        if (model.save())
-                        {
-                            cout << "mentés sikeres" << endl;
-                        }
-                        else
-                        {
-                            cout << "mentés sikertelen!" << endl;
-                        }
-                    }
-                    if (Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.K))
-                    {
-                        //TODO az UI-t le kell radírozni, helyébe az I/N-t kell tenni
-                    }
-
-                    break;
-                }
-
-                case States.ATFORK1:
-                {
-                    if (Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.D1))
-                    {
-                        model.setPosition(model.getCurrentPlayer(), 1);
-                        gameState = States.WAITINGFORINPUT;
-                    }
-                    if (Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.D2))
-                    {
-                        model.setPosition(model.getCurrentPlayer(), 2);
-                        gameState = States.WAITINGFORINPUT;
-                    }
-
-                    break;
-                }
-
-                case States.ATFORK2:
-                {
-                    if (Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.D1))
-                    {
-                        model.setPosition(model.getCurrentPlayer(), 49);
-                        --spinnedNumber;
-                        gameState = States.MOVING;
-                    }
-                    if (Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.D2))
-                    {
-                        model.setPosition(model.getCurrentPlayer(), 50);
-                        --spinnedNumber;
-                        gameState = States.MOVING;
-                    }
-
-                    break;
-                }
-
-                case States.ATFORK3:
-                {
-                    if (Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.D1))
-                    {
-                        model.setPosition(model.getCurrentPlayer(), 70);
-                        --spinnedNumber;
-                        gameState = States.MOVING;
-                    }
-                    if (Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.D2))
-                    {
-                        model.setPosition(model.getCurrentPlayer(), 71);
-                        --spinnedNumber;
-                        gameState = States.MOVING;
                     }
                     break;
-                }
 
-                case States.MOVING:
-                {
-                    if (model.getPosition(model.currentPlayer()) == 0)
+                case State.INSTRUCTIONS:
+                    if (Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.Escape))
                     {
-                        //TODO számok kirajzolása
-                        gameState = States.ATFORK1;
+                        gameState = State.MAINMENU;
                     }
-                    if (model.getPosition(model.currentPlayer()) == 48)
-                    {
-                        //TODO számok kirajzolása
-                        gameState = States.ATFORK2;
-                    }
-                    if (model.getPosition(model.currentPlayer()) == 69)
-                    {
-                        //TODO számok kirajzolása
-                        gameState = States.ATFORK3;
-                    }
-                    model.setPosition(model.getCurrentPlayer(), model.getPosition(model.getCurrentPlayer()) + 1);
-                    --spinnedNumber;
-                    if (spinnedNumber == 0)
-                    {
-                        gameState = States.EFFECTOFFIELD;
-                    }
-
                     break;
-                }
-            }
+            }//switch (gameState)
 
             base.Update(gameTime);
         }
+
+
+
+        #endregion
+        #region Draw
+
+
 
         /// <summary>
         /// This is called when the game should draw itself.
@@ -239,10 +186,27 @@ namespace GameOfLife
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
+            spriteBatch.Begin();
 
-            // TODO: Add your drawing code here
+            switch (gameState)
+            {
+                case State.MAINMENU:
+                    spriteBatch.Draw(startGameBtn, new Rectangle(350, 100, 120, 50), Color.White);
+                    spriteBatch.Draw(arrow, new Rectangle(300, 110 + arrowPosition * 50, 31, 31), Color.White);
+                    break;
 
+                case State.INSTRUCTIONS:
+                    String instructions = "A jatek celja, hogy bla bla bla\nAki a legtobb penzt osszegyujti, bla bla bla\nJo szorakozast!";
+                    spriteBatch.DrawString(font, instructions, new Vector2(20, 20), Color.Red);
+                    break;
+            }
+
+            spriteBatch.End();
             base.Draw(gameTime);
         }
+
+
+
+        #endregion
     }
 }
