@@ -1,0 +1,8 @@
+GameOfLife/DataModel/bin/
+GameOfLife/DataModel/obj/
+GameOfLife/GameOfLife/bin/
+GameOfLife/GameOfLife/obj/
+GameOfLife/GameOfLifeContent/bin/
+GameOfLife/GameOfLifeContent/obj/
+*.suo
+*.cachefile
