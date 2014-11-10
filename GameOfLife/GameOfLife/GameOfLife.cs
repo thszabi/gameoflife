@@ -42,6 +42,11 @@ namespace GameOfLife
 
         private Texture2D startGameBtn;
         private Texture2D arrow;
+        private Texture2D newGameBtn;
+        private Texture2D instructionsBtn;
+        private Texture2D openGameBtn;
+        private Texture2D escapeBtn;
+        private Texture2D menu_img;
 
         private SpriteFont font;
 
@@ -96,6 +101,13 @@ namespace GameOfLife
 
             startGameBtn = Content.Load<Texture2D>("startgamebtn");
             arrow = Content.Load<Texture2D>("arrow");
+
+            menu_img = Content.Load<Texture2D>("menu_img");
+
+            newGameBtn = Content.Load<Texture2D>("new_game_btn");
+            instructionsBtn = Content.Load<Texture2D>("instructions_btn");
+            openGameBtn = Content.Load<Texture2D>("open_game_btn");
+            escapeBtn = Content.Load<Texture2D>("esc_btn");
 
             font = Content.Load<SpriteFont>("Instructions");
         }
@@ -186,13 +198,24 @@ namespace GameOfLife
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
+
+            graphics.IsFullScreen = false;
+            graphics.PreferredBackBufferHeight = 750;
+            graphics.PreferredBackBufferWidth = 560;
+            graphics.ApplyChanges();
+
             spriteBatch.Begin();
 
             switch (gameState)
             {
                 case State.MAINMENU:
-                    spriteBatch.Draw(startGameBtn, new Rectangle(350, 100, 120, 50), Color.White);
-                    spriteBatch.Draw(arrow, new Rectangle(300, 110 + arrowPosition * 50, 31, 31), Color.White);
+                    spriteBatch.Draw(menu_img, new Rectangle(0, 0, 560, 750), Color.White);
+
+                    spriteBatch.Draw(newGameBtn, new Rectangle(200, 320, 158, 58), Color.White);
+                    spriteBatch.Draw(openGameBtn, new Rectangle(200, 398, 158, 58), Color.White);
+                    spriteBatch.Draw(instructionsBtn, new Rectangle(200, 476, 158, 58), Color.White);
+                    spriteBatch.Draw(escapeBtn, new Rectangle(200, 554, 158, 58), Color.White);
+                    spriteBatch.Draw(arrow, new Rectangle(165, 333 + arrowPosition * 78, 31, 31), Color.White);
                     break;
 
                 case State.INSTRUCTIONS:
