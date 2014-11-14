@@ -613,9 +613,9 @@ namespace GameOfLife.DataModel
             if (_playerList[playerNum].childrenNumber > 5)
                 return false;
             if (isGirl)
-                _playerList[playerNum].children[_playerList[playerNum].childrenNumber] = 0;
+                _playerList[playerNum].children.Add(0);
             else
-                _playerList[playerNum].children[_playerList[playerNum].childrenNumber] = 1;
+                _playerList[playerNum].children.Add(1);
             ++ _playerList[playerNum].childrenNumber;
             return true;
         }
