@@ -87,12 +87,22 @@ namespace GameOfLife
 
         //Fõmenühöz
         private Texture2D arrow;
+        private Texture2D arrowUp;
         private Texture2D newGameBtn;
         private Texture2D instructionsBtn;
         private Texture2D openGameBtn;
         private Texture2D escapeBtn;
         private Texture2D menuBackground; 
         
+        //Játékos kiválasztásához
+        private Texture2D choosePlayerBackground;
+        private Texture2D emptyProfile;
+        private Texture2D man;
+        private Texture2D woman;
+        private Texture2D manAI;
+        private Texture2D womanAI;
+        Texture2D[] img = new Texture2D[6];
+
         //
         private Texture2D boy;
         private Texture2D girl;
@@ -103,7 +113,6 @@ namespace GameOfLife
         private Texture2D escapeBtn2;
         private Texture2D spinBtn;
 
-        private Texture2D getLoanBtn;
         private Texture2D payBackLoanBtn;
         private Texture2D buyCarInsBtn;
         private Texture2D buyHouseInsBtn;
@@ -123,6 +132,12 @@ namespace GameOfLife
         public GameOfLife()
         {
             graphics = new GraphicsDeviceManager(this);
+
+            graphics.IsFullScreen = false;
+            graphics.PreferredBackBufferHeight = 835;
+            graphics.PreferredBackBufferWidth = 956;
+            graphics.ApplyChanges();
+
             Content.RootDirectory = "Content";
         }
 
@@ -173,13 +188,20 @@ namespace GameOfLife
             escapeBtn = Content.Load<Texture2D>("esc_btn");
             menuBackground = Content.Load<Texture2D>("menu_img");
 
+            arrowUp = Content.Load<Texture2D>("arrow_up");
+            choosePlayerBackground = Content.Load<Texture2D>("empty_img");
+            emptyProfile = Content.Load<Texture2D>("empty_profile");
+            man = Content.Load<Texture2D>("man_profile");
+            woman = Content.Load<Texture2D>("woman_profile");
+            manAI = Content.Load<Texture2D>("man_m_profile");
+            womanAI = Content.Load<Texture2D>("woman_m_profile");
+            
             boy= Content.Load<Texture2D>("boy");
             girl= Content.Load<Texture2D>("girl");
             empty = Content.Load<Texture2D>("empty");
             saveBtn = Content.Load<Texture2D>("save_btn");
             escapeBtn2 = Content.Load<Texture2D>("esc_btn2");
             spinBtn = Content.Load<Texture2D>("spin_btn");
-            getLoanBtn = Content.Load<Texture2D>("get_loan_btn");
             payBackLoanBtn = Content.Load<Texture2D>("pay_back_loan_btn");
             buyCarInsBtn = Content.Load<Texture2D>("buy_car_ins_btn");
             buyHouseInsBtn = Content.Load<Texture2D>("buy_house_ins_btn");
@@ -249,6 +271,7 @@ namespace GameOfLife
                                 for (int i = 0; i < 6; ++i)
                                 {
                                     numberOfPlayers[i] = 0;
+                                    img[i] = emptyProfile;
                                 }
                                 break;
 
@@ -437,7 +460,7 @@ namespace GameOfLife
                                     break;
 
                                 case 4: //Hitel visszafizetése
-                                    if (model.PayBackLoan(model.ActualPlayer))
+                                    /*if (model.PayBackLoan(model.ActualPlayer))
                                     {
                                         //TODO kimenet: sikeres visszafizetés
                                         if (model.PlayerLoan(model.ActualPlayer) == 0)
@@ -448,7 +471,7 @@ namespace GameOfLife
                                     else
                                     {
                                         //TODO kimenet: sikertelen visszafizetés
-                                    }
+                                    }*/
                                     break;
 
                                 case 5: //Mentés
@@ -502,7 +525,7 @@ namespace GameOfLife
                     //"1" lekezelése - a játékos az egyetemet választotta
                     if (oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1))
                     {
-                        model.GivePlayerLocation(model.ActualPlayer,1);
+                        model.SetPlayerLocation(model.ActualPlayer,1);
                         //TODO GiveLoanOnly
                         model.GetLoan(model.ActualPlayer, 40000);
                         model.PayMoney(model.ActualPlayer, 40000);
@@ -512,9 +535,9 @@ namespace GameOfLife
                     //"2" lekezelése - a játékos a karriert választotta
                     if (oldKeyboardState.IsKeyUp(Keys.D2) && newKeyboardState.IsKeyDown(Keys.D2))
                     {
-                        model.GivePlayerLocation(model.ActualPlayer,13);
-                        model.NeedCareer(model.ActualPlayer);
-                        model.NeedSalary(model.ActualPlayer);
+                        model.SetPlayerLocation(model.ActualPlayer,13);
+                        //model.NeedCareer(model.ActualPlayer);
+                        //model.NeedSalary(model.ActualPlayer);
 
                         gameState = State.PLAYERSTURN;
                     }
@@ -550,14 +573,14 @@ namespace GameOfLife
                     //"1" lekezelése - a játékost elõre léptetjük eggyel az 1. útvonalon
                     if (oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1))
                     {
-                        model.GivePlayerLocation(model.ActualPlayer, 51);
+                        model.SetPlayerLocation(model.ActualPlayer, 51);
                         --stepsLeft;
                         gameState = State.MOVING;
                     }
                     //"2" lekezelése - a játékost elõre léptetjük eggyel az 2. útvonalon
                     if (oldKeyboardState.IsKeyUp(Keys.D2) && newKeyboardState.IsKeyDown(Keys.D2))
                     {
-                        model.GivePlayerLocation(model.ActualPlayer, 57);
+                        model.SetPlayerLocation(model.ActualPlayer, 57);
                         --stepsLeft;
                         gameState = State.MOVING;
                     }
@@ -567,14 +590,14 @@ namespace GameOfLife
                     //"1" lekezelése - a játékost elõre léptetjük eggyel az 1. útvonalon
                     if (oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1))
                     {
-                        model.GivePlayerLocation(model.ActualPlayer, 87);
+                        model.SetPlayerLocation(model.ActualPlayer, 87);
                         --stepsLeft;
                         gameState = State.MOVING;
                     }
                     //"2" lekezelése - a játékost elõre léptetjük eggyel az 2. útvonalon
                     if (oldKeyboardState.IsKeyUp(Keys.D2) && newKeyboardState.IsKeyDown(Keys.D2))
                     {
-                        model.GivePlayerLocation(model.ActualPlayer, 94);
+                        model.SetPlayerLocation(model.ActualPlayer, 94);
                         --stepsLeft;
                         gameState = State.MOVING;
                     }
@@ -584,7 +607,7 @@ namespace GameOfLife
                     //"1" lekezelése - a játékos a vidéki házba megy nyugdíjba
                     if (oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1))
                     {
-                        model.GivePlayerLocation(model.ActualPlayer, 151);
+                        model.SetPlayerLocation(model.ActualPlayer, 151);
                         model.Retire(model.ActualPlayer, false);
                         //TODO check for ending
                         model.NextPlayer();
@@ -593,7 +616,7 @@ namespace GameOfLife
                     //"2" lekezelése - a játékos a milliomosok nyaralójába megy nyugdíjba
                     if (oldKeyboardState.IsKeyUp(Keys.D2) && newKeyboardState.IsKeyDown(Keys.D2))
                     {
-                        model.GivePlayerLocation(model.ActualPlayer, 150);
+                        model.SetPlayerLocation(model.ActualPlayer, 150);
                         model.Retire(model.ActualPlayer, true);
                         //TODO check for ending
                         model.NextPlayer();
@@ -673,18 +696,18 @@ namespace GameOfLife
             switch (model.PlayerLocation(model.ActualPlayer))
             {
                 case 12: //Egyetemista végzett
-                    model.GivePlayerLocation(model.ActualPlayer, 17);
+                    model.SetPlayerLocation(model.ActualPlayer, 17);
                     break;
 
                 case 56: //FORK1
-                    model.GivePlayerLocation(model.ActualPlayer, 64);
+                    model.SetPlayerLocation(model.ActualPlayer, 64);
                     break;
 
                 case 93: //FORK2
-                    model.GivePlayerLocation(model.ActualPlayer, 98);
+                    model.SetPlayerLocation(model.ActualPlayer, 98);
                     break;
                 default:
-                    model.GivePlayerLocation(model.ActualPlayer, model.PlayerLocation(model.ActualPlayer)+1);
+                    model.SetPlayerLocation(model.ActualPlayer, model.PlayerLocation(model.ActualPlayer)+1);
                     break;
             }
 
@@ -736,11 +759,6 @@ namespace GameOfLife
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            graphics.IsFullScreen = false;
-            graphics.PreferredBackBufferHeight = 835;
-            graphics.PreferredBackBufferWidth = 956;
-            graphics.ApplyChanges();
-
             spriteBatch.Begin();
 
             switch (gameState)
@@ -763,57 +781,109 @@ namespace GameOfLife
                     spriteBatch.DrawString(instructionsFont, instructions, new Vector2(30, 70), Color.White);
                     break;
 
-                case State.PLAYERSTURN://TEST:
-                    /*graphics.IsFullScreen = false;
-                    graphics.PreferredBackBufferHeight = 835;
-                    graphics.PreferredBackBufferWidth = 956;
-                    graphics.ApplyChanges();*/
+                case State.NUMBEROFPLAYERS:
+                    spriteBatch.Draw(choosePlayerBackground, new Rectangle(0, 0, 956, 835), Color.White);
+
+                    switch (numberOfPlayers[arrowPosition])
+                    {
+                        case 1:
+                            img[arrowPosition] = man;
+                            break;
+                        case 2:
+                            img[arrowPosition] = woman;
+                            break;
+                        case 3:
+                            img[arrowPosition] = manAI;
+                            break;
+                        case 4:
+                            img[arrowPosition] = womanAI;
+                            break;
+                        case 5:
+                            img[arrowPosition] = emptyProfile;
+                            break;
+                    }
+                    
+                    spriteBatch.Draw(img[0], new Rectangle(138, 180, 200, 200), Color.White);
+                    spriteBatch.Draw(img[1], new Rectangle(378, 180, 200, 200), Color.White);
+                    spriteBatch.Draw(img[2], new Rectangle(618, 180, 200, 200), Color.White);
+                    spriteBatch.Draw(img[3], new Rectangle(138, 420, 200, 200), Color.White);
+                    spriteBatch.Draw(img[4], new Rectangle(378, 420, 200, 200), Color.White);
+                    spriteBatch.Draw(img[5], new Rectangle(618, 420, 200, 200), Color.White);
+
+                    spriteBatch.Draw(arrowUp, new Rectangle(223 + (arrowPosition % 3) * 240, 383 + Convert.ToInt32(arrowPosition > 2) * 240, 31, 31), Color.White);
+                    break;
+
+                case State.COLLEGEORCAREER: case State.PLAYERSTURN:
                     spriteBatch.Draw(palya2, new Rectangle(0, 0, 956, 835), Color.White);
 
-                    spriteBatch.Draw(saveBtn, new Rectangle(680, 15, 105, 35), Color.White);
+                    spriteBatch.Draw(saveBtn, new Rectangle(660, 15, 105, 35), Color.White);
                     spriteBatch.Draw(escapeBtn2, new Rectangle(820, 15, 105, 35), Color.White);
 
-                    spriteBatch.Draw(buyHouseInsBtn, new Rectangle(60, 660, 143, 53), Color.White);
-                    spriteBatch.Draw(buyCarInsBtn, new Rectangle(243, 660, 143, 53), Color.White);
-                    spriteBatch.Draw(buyStockBtn, new Rectangle(426, 660, 143, 53), Color.White);
-                    spriteBatch.Draw(getLoanBtn, new Rectangle(60, 743, 143, 53), Color.White);
-                    spriteBatch.Draw(payBackLoanBtn, new Rectangle(243, 743, 143, 53), Color.White);
+                    spriteBatch.Draw(buyHouseInsBtn, new Rectangle(343, 660, 143, 53), Color.White);
+                    spriteBatch.Draw(buyCarInsBtn, new Rectangle(526, 660, 143, 53), Color.White);
+                    spriteBatch.Draw(buyStockBtn, new Rectangle(343, 743, 143, 53), Color.White);
+                    spriteBatch.Draw(payBackLoanBtn, new Rectangle(526, 743, 143, 53), Color.White);
 
-                    spriteBatch.Draw(spinBtn, new Rectangle(650, 680, 143, 97), Color.White);
+                    spriteBatch.Draw(spinBtn, new Rectangle(60, 680, 143, 97), Color.White);
+                    int arrowX, arrowY;
+                    switch(arrowPosition)
+                    {
+                        case 0:
+                            arrowX = 26; arrowY = 713; break;
+                        case 1:
+                            arrowX = 310; arrowY = 670; break;
+                        case 2:
+                            arrowX = 492; arrowY = 670; break;
+                        case 3:
+                            arrowX = 310; arrowY = 755; break;
+                        case 4:
+                            arrowX = 492; arrowY = 755; break;
+                        case 5:
+                            arrowX = 626; arrowY = 18; break;
+                        default:
+                            arrowX = 786; arrowY = 18; break;
+                    }
+                    spriteBatch.Draw(arrow, new Rectangle(arrowX, arrowY, 31, 31), Color.White);
 
-                    String playersName = "Játékos 1"; //model.PlayerName(model.ActualPlayer);
+                    String playersName = model.PlayerName(model.ActualPlayer);
                     spriteBatch.DrawString(titleFont, playersName, new Vector2(20, 595), Color.White);
-                    String playersMoney = "$ 1000"; // "$ " + model.PlayerMoney(model.ActualPlayer);
+                    String playersMoney = "$ " + model.PlayerMoney(model.ActualPlayer).ToString();
                     spriteBatch.DrawString(titleFont, playersMoney, new Vector2(250, 595), Color.White);
-                    String playersLoan = "$ 300"; //"$ " + model.PlayerLoan(model.ActualPlayer);
-                    spriteBatch.DrawString(titleFont, playersLoan, new Vector2(440, 595), Color.White);
-                    String playersCard = "3"; //model.PlayerLifeCardNumber(model.ActualPlayer);
+                    String playersLoan = "$ " + model.PlayerLoan(model.ActualPlayer).ToString();
+                    spriteBatch.DrawString(titleFont, playersLoan, new Vector2(430, 595), Color.White);
+                    String playersCard = model.PlayerLifeCardNumber(model.ActualPlayer).ToString();
                     spriteBatch.DrawString(titleFont, playersCard, new Vector2(630, 595), Color.White);
 
-                    //if (model.PlayerGender(model.ActualPlayer)) { 
+                    if (gameState == State.COLLEGEORCAREER)
+                    {
+                        String choose = "Egyetem (1-es gomb) vagy karrier (2-es gomb)?";
+                        spriteBatch.DrawString(titleFont, choose, new Vector2(10, 10), Color.White);
+                    }
+
+                    if (model.PlayerGender(model.ActualPlayer)) { 
                         spriteBatch.Draw(girl, new Rectangle(780, 595, 20, 52), Color.White);
-                        //if (model.PlayerMarried(model.ActualPlayer)) {
+                        if (model.PlayerMarried(model.ActualPlayer)) {
                             spriteBatch.Draw(boy, new Rectangle(805, 594, 20, 52), Color.White);
-                            //if (model.PlayerChildrenNumber(model.ActualPlayer) >= 1){
+                            if (model.PlayerChildrenNumber(model.ActualPlayer) >= 1){
                                 spriteBatch.Draw(empty, new Rectangle(830, 595, 20, 52), Color.White);
-                                //if (model.PlayerChildrenNumber(model.ActualPlayer) == 2) {
+                                if (model.PlayerChildrenNumber(model.ActualPlayer) == 2) {
                                     spriteBatch.Draw(empty, new Rectangle(855, 595, 20, 52), Color.White);
-                                //}
-                            //}
-                        //}
-                    //}
-                    //else {
-                        //spriteBatch.Draw(boy, new Rectangle(775, 588, 20, 52), Color.White);
-                        //if (model.PlayerMarried(model.ActualPlayer)) {
-                            //spriteBatch.Draw(girl, new Rectangle(805, 594, 20, 52), Color.White);
-                            //if (model.PlayerChildrenNumber(model.ActualPlayer) >= 1){
-                                //spriteBatch.Draw(empty, new Rectangle(830, 595, 20, 52), Color.White);
-                                //if (model.PlayerChildrenNumber(model.ActualPlayer) == 2) {
-                                    //spriteBatch.Draw(empty, new Rectangle(855, 595, 20, 52), Color.White);
-                                //}
-                            //}
-                        //}
-                    //}
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        spriteBatch.Draw(boy, new Rectangle(775, 588, 20, 52), Color.White);
+                        if (model.PlayerMarried(model.ActualPlayer)) {
+                            spriteBatch.Draw(girl, new Rectangle(805, 594, 20, 52), Color.White);
+                            if (model.PlayerChildrenNumber(model.ActualPlayer) >= 1){
+                                spriteBatch.Draw(empty, new Rectangle(830, 595, 20, 52), Color.White);
+                                if (model.PlayerChildrenNumber(model.ActualPlayer) == 2) {
+                                    spriteBatch.Draw(empty, new Rectangle(855, 595, 20, 52), Color.White);
+                                }
+                            }
+                        }
+                    }
                     break;
             }
 

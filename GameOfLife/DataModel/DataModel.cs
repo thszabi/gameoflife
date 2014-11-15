@@ -1000,5 +1000,15 @@ namespace GameOfLife.DataModel
 
         #endregion
 
+        public bool IsRetired(int p)
+        {
+            return _playerList[_actualPlayer].retired != 0;
+        }
+
+        public void NextPlayer()
+        {
+            this._actualPlayer++;
+        }
+        
     }
 }
