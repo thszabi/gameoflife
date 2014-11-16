@@ -460,7 +460,7 @@ namespace GameOfLife
                                     break;
 
                                 case 4: //Hitel visszafizetése
-                                    /*if (model.PayBackLoan(model.ActualPlayer))
+                                    if (model.PayBackLoan(model.ActualPlayer,25000))
                                     {
                                         //TODO kimenet: sikeres visszafizetés
                                         if (model.PlayerLoan(model.ActualPlayer) == 0)
@@ -471,7 +471,7 @@ namespace GameOfLife
                                     else
                                     {
                                         //TODO kimenet: sikertelen visszafizetés
-                                    }*/
+                                    }
                                     break;
 
                                 case 5: //Mentés
@@ -536,8 +536,8 @@ namespace GameOfLife
                     if (oldKeyboardState.IsKeyUp(Keys.D2) && newKeyboardState.IsKeyDown(Keys.D2))
                     {
                         model.SetPlayerLocation(model.ActualPlayer,13);
-                        //model.NeedCareer(model.ActualPlayer);
-                        //model.NeedSalary(model.ActualPlayer);
+                        model.GiveCareer(model.ActualPlayer);
+                        model.GiveSalary(model.ActualPlayer);
 
                         gameState = State.PLAYERSTURN;
                     }
@@ -786,6 +786,9 @@ namespace GameOfLife
 
                     switch (numberOfPlayers[arrowPosition])
                     {
+                        case 0: //T.SZ.
+                            img[arrowPosition] = emptyProfile;
+                            break;
                         case 1:
                             img[arrowPosition] = man;
                             break;
@@ -797,9 +800,6 @@ namespace GameOfLife
                             break;
                         case 4:
                             img[arrowPosition] = womanAI;
-                            break;
-                        case 5:
-                            img[arrowPosition] = emptyProfile;
                             break;
                     }
                     

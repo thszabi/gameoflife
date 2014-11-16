@@ -788,7 +788,7 @@ namespace GameOfLife.DataModel
             }
             else
             {
-                if (!_remainedStockCards.Contains(steps))
+                if (!_remainedStockCards.Contains(steps-1)) //T.SZ.
                 {
                     Int32 temp = 0;
                     foreach (Player player in _playerList)
@@ -801,9 +801,10 @@ namespace GameOfLife.DataModel
                         throw new Exception("A karrier nem található");
                 }
             }
+            /*T.SZ.
             Int32 nextPlayer = (playerNum+1)%playerNum;
             while (!_remainedPlayers.Contains(nextPlayer))
-                nextPlayer = (nextPlayer + 1)%playerNum;
+                nextPlayer = (nextPlayer + 1)%playerNum;*/
             if (owner != -1)
                 _playerList[owner].money += 10000;
             if (police)
@@ -1000,6 +1001,7 @@ namespace GameOfLife.DataModel
 
         #endregion
 
+        /*V.A.
         public bool IsRetired(int p)
         {
             return _playerList[_actualPlayer].retired != 0;
@@ -1008,6 +1010,17 @@ namespace GameOfLife.DataModel
         public void NextPlayer()
         {
             this._actualPlayer++;
+        }*/
+
+        //T.SZ.
+        public bool IsRetired(Int32 playerNum)
+        {
+            return (_playerList[playerNum].retired != 0);
+        }
+        
+        public void NextPlayer()
+        {
+            ActualPlayer = (ActualPlayer + 1) % _playerNumber;
         }
         
     }
