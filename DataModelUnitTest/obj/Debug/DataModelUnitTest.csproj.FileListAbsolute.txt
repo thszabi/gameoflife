@@ -1,0 +1,7 @@
+C:\Users\S-Home\Documents\Tanulás\szoftech\GameOfLife\DataModelUnitTest\bin\Debug\DataModelUnitTest.dll
+C:\Users\S-Home\Documents\Tanulás\szoftech\GameOfLife\DataModelUnitTest\bin\Debug\DataModelUnitTest.pdb
+C:\Users\S-Home\Documents\Tanulás\szoftech\GameOfLife\DataModelUnitTest\bin\Debug\DataModel.dll
+C:\Users\S-Home\Documents\Tanulás\szoftech\GameOfLife\DataModelUnitTest\bin\Debug\DataModel.pdb
+C:\Users\S-Home\Documents\Tanulás\szoftech\GameOfLife\DataModelUnitTest\obj\Debug\DataModelUnitTest.csprojResolveAssemblyReference.cache
+C:\Users\S-Home\Documents\Tanulás\szoftech\GameOfLife\DataModelUnitTest\obj\Debug\DataModelUnitTest.dll
+C:\Users\S-Home\Documents\Tanulás\szoftech\GameOfLife\DataModelUnitTest\obj\Debug\DataModelUnitTest.pdb
