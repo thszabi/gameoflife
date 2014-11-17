@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace GameOfLife.DataModel
 {
+    [Serializable]
     struct Player
     {
         public Boolean actual;

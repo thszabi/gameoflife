@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace GameOfLife.DataModel
@@ -9,8 +8,8 @@ namespace GameOfLife.DataModel
     [Serializable]
     public class DataModel
     {
-        private readonly Int32[] _costForHouseCards = {40000, 60000, 80000, 100000, 120000, 140000, 160000, 180000,200000};
-        private readonly Int32[] _insuranceForHouseCards = {10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000};
+        private readonly Int32[] _costForHouseCards = { 40000, 60000, 80000, 100000, 120000, 140000, 160000, 180000, 200000 };
+        private readonly Int32[] _insuranceForHouseCards = { 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000 };
         private Player[] _playerList;
         private Int32 _playerNumber;
         private List<Int32> _remainedCareerCards;
@@ -21,12 +20,12 @@ namespace GameOfLife.DataModel
         private List<Int32> _remainedPlayers;
         private Int32 _actualPlayer;
         private List<Int32> _rewardForLifeCards;
-        private readonly Int32[] _moneyForSalaryCards = {20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000};
-        private readonly Int32[] _taxForSalaryCards = {5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000};
-        
+        private readonly Int32[] _moneyForSalaryCards = { 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000 };
+        private readonly Int32[] _taxForSalaryCards = { 5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000 };
+
         #region Get Game Data
 
-        public Int32 ActualPlayer {get {if(_remainedPlayers.Count>0) return _actualPlayer; return -1;} set { _actualPlayer = value;}}
+        public Int32 ActualPlayer { get { if (_remainedPlayers.Count > 0) return _actualPlayer; return -1; } set { _actualPlayer = value; } }
 
         #endregion
 
@@ -42,7 +41,7 @@ namespace GameOfLife.DataModel
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
             return _playerList[playerNum].careerCard;
         }
-        
+
         /// <summary>
         /// Játékos rendelkezik-e gépjármű biztosítással.
         /// </summary>
@@ -216,7 +215,7 @@ namespace GameOfLife.DataModel
         {
             if (stockcard >= 9)
                 throw new ArgumentException("A részvény száma hibás", "stockcard");
-            return _remainedStockCards.Contains(stockcard); 
+            return _remainedStockCards.Contains(stockcard);
         }
 
         /// <summary>
@@ -425,8 +424,8 @@ namespace GameOfLife.DataModel
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            if(_playerList[playerNum].married)
-                throw new ArgumentException("A játékos már házas","playerNum");
+            if (_playerList[playerNum].married)
+                throw new ArgumentException("A játékos már házas", "playerNum");
             _playerList[playerNum].married = true;
         }
 
@@ -439,7 +438,7 @@ namespace GameOfLife.DataModel
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            if(sum < 0)
+            if (sum < 0)
                 throw new ArgumentException("A megadott összeg hibás", "sum");
             _playerList[playerNum].money += sum;
         }
@@ -463,7 +462,7 @@ namespace GameOfLife.DataModel
                     max = player.location;
                     maxPlayer = temp;
                 }
-                ++ temp;
+                ++temp;
             }
             return (maxPlayer == playerNum);
         }
@@ -505,12 +504,12 @@ namespace GameOfLife.DataModel
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            if(_remainedCareerCards.Count == 0)
+            if (_remainedCareerCards.Count == 0)
                 throw new Exception("Nincs több karrier kártya");
             Random rnd = new Random();
             Int32 r = rnd.Next(_remainedCareerCards.Count);
             Int32 careerCard = _remainedCareerCards[r];
-            if(_playerList[playerNum].careerCard != 9)
+            if (_playerList[playerNum].careerCard != 9)
                 _remainedCareerCards.Add(_playerList[playerNum].careerCard);
             _playerList[playerNum].careerCard = careerCard;
             _remainedCareerCards.Remove(careerCard);
@@ -552,7 +551,7 @@ namespace GameOfLife.DataModel
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            if(_remainedLifeCards != 0)
+            if (_remainedLifeCards != 0)
                 throw new Exception("Még van élet kártya a pakliban");
             Random rnd = new Random();
             Int32 r = rnd.Next(_remainedPlayers.Count);
@@ -563,7 +562,7 @@ namespace GameOfLife.DataModel
                 otherPlayer = _remainedPlayers[r];
             }
             --_playerList[otherPlayer].lifeCardNumber;
-            ++ _playerList[playerNum].lifeCardNumber;
+            ++_playerList[playerNum].lifeCardNumber;
             return otherPlayer;
         }
 
@@ -639,7 +638,7 @@ namespace GameOfLife.DataModel
                 _playerList[playerNum].children.Add(0);
             else
                 _playerList[playerNum].children.Add(1);
-            ++ _playerList[playerNum].childrenNumber;
+            ++_playerList[playerNum].childrenNumber;
             return true;
         }
 
@@ -683,8 +682,8 @@ namespace GameOfLife.DataModel
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            if(sum<0)
-                throw new ArgumentException("A pénzösszeg rosszul van megadva","sum");
+            if (sum < 0)
+                throw new ArgumentException("A pénzösszeg rosszul van megadva", "sum");
             if (_playerList[playerNum].money < sum)
                 return false;
             _playerList[playerNum].money -= sum;
@@ -748,7 +747,7 @@ namespace GameOfLife.DataModel
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            if(_playerList[playerNum].salaryCard == 9)
+            if (_playerList[playerNum].salaryCard == 9)
                 throw new Exception("A játékosnak még nincs fizetése.");
             if (_playerList[playerNum].money < _taxForSalaryCards[_playerList[playerNum].salaryCard])
                 return false;
@@ -765,14 +764,16 @@ namespace GameOfLife.DataModel
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            if(_playerList[playerNum].childrenNumber > 4)
-                return new Tuple<bool, int[]>(false, new[]{0,0});
+            if (_playerList[playerNum].childrenNumber > 4)
+                return new Tuple<bool, int[]>(false, new[] { 0, 0 });
             Int32[] twins = new int[2];
             Random rnd = new Random();
             for (int i = 0; i < 2; i++)
             {
-                Int32 r = rnd.Next(0,1);
+                Int32 r = rnd.Next(0, 1);
                 twins[i] = r;
+                ++_playerList[playerNum].childrenNumber;
+                _playerList[playerNum].children.Add(r);
             }
             return new Tuple<bool, int[]>(true, twins);
         }
@@ -785,11 +786,11 @@ namespace GameOfLife.DataModel
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            if(_playerList[playerNum].deg)
+            if (_playerList[playerNum].deg)
                 throw new Exception("A játékos már egyszer ledipomázott.");
             _playerList[playerNum].deg = true;
         }
-        
+
         /// <summary>
         /// Pörgetés
         /// </summary>
@@ -817,13 +818,13 @@ namespace GameOfLife.DataModel
                         }
                         ++temp;
                     }
-                    if(owner == -1)
+                    if (owner == -1)
                         throw new Exception("A rendőr nem található");
                 }
             }
             else
             {
-                if (!_remainedStockCards.Contains(steps-1)) //T.SZ.
+                if (!_remainedStockCards.Contains(steps - 1))
                 {
                     Int32 temp = 0;
                     foreach (Player player in _playerList)
@@ -836,10 +837,6 @@ namespace GameOfLife.DataModel
                         throw new Exception("A karrier nem található");
                 }
             }
-            /*T.SZ.
-            Int32 nextPlayer = (playerNum+1)%playerNum;
-            while (!_remainedPlayers.Contains(nextPlayer))
-                nextPlayer = (nextPlayer + 1)%playerNum;*/
             if (owner != -1)
                 _playerList[owner].money += 10000;
             if (police)
@@ -878,13 +875,14 @@ namespace GameOfLife.DataModel
         /// <returns><c>0</c>, ha a mentés sikeres volt. <c>1</c>, ha a file már létezik. <c>2</c>, ha a mentés sikertelen volt.</returns>
         public Int32 Save(String filename, Boolean sure)
         {
-            if (File.Exists(filename + ".bin") && !sure)
+            filename = filename + ".xml";
+            if (File.Exists(filename) && !sure)
                 return 1;
             try
             {
-                IFormatter formatter = new BinaryFormatter();
-                Stream stream = new FileStream(filename + ".bin", FileMode.Create, FileAccess.Write, FileShare.None);
-                formatter.Serialize(stream, this);
+                Stream stream = File.Open(filename, FileMode.Create);
+                BinaryFormatter bformatter = new BinaryFormatter();
+                bformatter.Serialize(stream, this);
                 stream.Close();
             }
             catch (Exception)
@@ -906,7 +904,7 @@ namespace GameOfLife.DataModel
             List<Int32> maxPlayer = new List<int>();
             while (_playerList[temp].retired != 2 && temp < _playerNumber)
             {
-                ++ temp;
+                ++temp;
             }
             if (temp < _playerNumber)
             {
@@ -935,7 +933,7 @@ namespace GameOfLife.DataModel
 
                 foreach (int max in maxPlayer)
                 {
-                    _playerList[max].lifeCardNumber += 4%maxPlayer.Count;
+                    _playerList[max].lifeCardNumber += 4 % maxPlayer.Count;
                 }
             }
 
@@ -964,7 +962,7 @@ namespace GameOfLife.DataModel
                 }
                 else
                 {
-                    if(_playerList[i].money == winnerMoney)
+                    if (_playerList[i].money == winnerMoney)
                         winners.Add(i);
                 }
             }
@@ -980,7 +978,7 @@ namespace GameOfLife.DataModel
         /// </summary>
         /// <param name="playerNum">Játékos száma</param>
         /// <param name="playerDataList">Játékos neve, Nő-e, AI-e</param>
-        public DataModel(Int32 playerNum, List<Tuple<String, Boolean, Boolean>>playerDataList )
+        public DataModel(Int32 playerNum, List<Tuple<String, Boolean, Boolean>> playerDataList)
         {
             if (playerNum < 2 || playerNum > 6)
                 throw new ArgumentException("A megadott játékos-szám hibás", "playerNum");
@@ -992,11 +990,11 @@ namespace GameOfLife.DataModel
                 _playerList[i] = new Player(playerDataList[i].Item1, playerDataList[i].Item2, playerDataList[i].Item3);
             }
             _playerNumber = playerNum;
-            _remainedCareerCards = new List<int> {0, 1, 2, 3, 4, 5, 6, 7, 8};
-            _remainedHouseCards = new List<int> {0, 1, 2, 3, 4, 5, 6, 7, 8};
+            _remainedCareerCards = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+            _remainedHouseCards = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
             _remainedLifeCards = 21;
-            _remainedSalaryCards = new List<int> {0, 1, 2, 3, 4, 5, 6, 7, 8};
-            _remainedStockCards = new List<int> {0, 1, 2, 3, 4, 5, 6, 7, 8};
+            _remainedSalaryCards = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+            _remainedStockCards = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
             _remainedPlayers = new List<int>();
             for (int i = 0; i < playerNum; i++)
                 _remainedPlayers.Add(i);
@@ -1022,12 +1020,13 @@ namespace GameOfLife.DataModel
         /// <param name="filename">Fájl neve</param>
         public DataModel(String filename)
         {
-            if (File.Exists(filename + ".bin"))
+            filename = filename + ".xml";
+            if (!File.Exists(filename))
                 throw new FileNotFoundException();
-            
-            IFormatter formatter = new BinaryFormatter();
-            Stream stream = new FileStream(filename + ".bin", FileMode.Open, FileAccess.Read, FileShare.Read);
-            DataModel fromFile = ((DataModel)formatter.Deserialize(stream));
+
+            Stream stream = File.Open(filename, FileMode.Open);
+            BinaryFormatter bformatter = new BinaryFormatter();
+            DataModel fromFile = (DataModel)bformatter.Deserialize(stream);
             stream.Close();
 
             _playerList = fromFile._playerList;
@@ -1043,10 +1042,5 @@ namespace GameOfLife.DataModel
         }
 
         #endregion
-
-      
-        
-        
-        
     }
 }
