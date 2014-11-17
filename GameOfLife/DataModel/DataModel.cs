@@ -88,6 +88,17 @@ namespace GameOfLife.DataModel
         }
 
         /// <summary>
+        /// Játékos diplomás-e
+        /// </summary>
+        /// <param name="playerNum">Játékos száma</param>
+        public Boolean PlayerDegree(Int32 playerNum)
+        {
+            if (playerNum >= _playerList.Length)
+                throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
+            return _playerList[playerNum].deg;
+        }
+
+        /// <summary>
         /// Játékos birtoklevelének száma
         /// </summary>
         /// <param name="playerNum">Játékos száma</param>
