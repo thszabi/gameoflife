@@ -230,6 +230,18 @@ namespace GameOfLife.DataModel
             return _playerList[playerNum].loseNextRound;
         }
 
+        /// <summary>
+        /// Nyugdíjas-e
+        /// </summary>
+        /// <param name="playerNum">Játékos száma</param>
+        /// <returns><c>true</c> A játékos nyugdíjas. <c>false</c> A járékos még nem ment nyugdíjba.</returns>
+        public bool IsRetired(Int32 playerNum)
+        {
+            if (playerNum >= _playerList.Length)
+                throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
+            return (_playerList[playerNum].retired != 0);
+        }
+
         #endregion
 
         #region Game Effects
@@ -754,6 +766,18 @@ namespace GameOfLife.DataModel
             return new Tuple<bool, int[]>(true, twins);
         }
 
+        /// <summary>
+        /// A játékos megszerzi a diplomát.
+        /// </summary>
+        /// <param name="playerNum">Játékos száma</param>
+        public void TakeDegree(int playerNum)
+        {
+            if (playerNum >= _playerList.Length)
+                throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
+            if(_playerList[playerNum].deg)
+                throw new Exception("A játékos már egyszer ledipomázott.");
+            _playerList[playerNum].deg = true;
+        }
         
         /// <summary>
         /// Pörgetés
@@ -825,6 +849,14 @@ namespace GameOfLife.DataModel
             if (location < 0 || location > 151)
                 throw new ArgumentException("A megadott lépés-szám hibás", "location");
             _playerList[playerNum].location = location;
+        }
+
+        /// <summary>
+        /// Az aktuális játékost lépteti.
+        /// </summary>
+        public void NextPlayer()
+        {
+            _actualPlayer = (_actualPlayer + 1) % _playerNumber;
         }
 
         /// <summary>
@@ -1001,27 +1033,9 @@ namespace GameOfLife.DataModel
 
         #endregion
 
-        /*V.A.
-        public bool IsRetired(int p)
-        {
-            return _playerList[_actualPlayer].retired != 0;
-        }
-
-        public void NextPlayer()
-        {
-            this._actualPlayer++;
-        }*/
-
-        //T.SZ.
-        public bool IsRetired(Int32 playerNum)
-        {
-            return (_playerList[playerNum].retired != 0);
-        }
+      
         
-        public void NextPlayer()
-        {
-            ActualPlayer = (ActualPlayer + 1) % _playerNumber;
-        }
+        
         
     }
 }

@@ -24,6 +24,7 @@ namespace GameOfLife.DataModel
         public Int32 retired;
         public Int32 salaryCard;
         public Int32 stockCard;
+        public Boolean deg;
 
         public Player(String playerName, Boolean isFemale, Boolean isPc)
         {
@@ -46,6 +47,7 @@ namespace GameOfLife.DataModel
             retired = 0;                    // 0 -> nem nyugdíjas, 1 -> Vidéki ház, 2 -> Milliomosok nyaralója
             salaryCard = 9;                 // 0-8 -> fizetés kártya száma, 9 -> még nincs fizetés kártyája
             stockCard = 9;                  // 0-8 -> részvény száma, 9 -> még nincs részvénye
+            deg = false;                   // true -> rendelkezik diplomával
         }
     }
 }
