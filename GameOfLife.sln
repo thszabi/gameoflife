@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameOfLife", "GameOfLife\GameOfLife\GameOfLife.csproj", "{9DD42496-57AF-4297-9344-0B418E9CFFD4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameOfLifeContent", "GameOfLife\GameOfLifeContent\GameOfLifeContent.contentproj", "{6C49E8EB-011A-4EC3-8CC3-D92EE559EF5A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataModel", "GameOfLife\DataModel\DataModel.csproj", "{2172F7C2-5654-4386-B75C-0AFD3E5BCE4D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComputerAI", "GameOfLife\ComputerAI\ComputerAI.csproj", "{2A633B32-9079-4E23-B236-F1EE41E0F650}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,6 +47,16 @@ Global
 		{2172F7C2-5654-4386-B75C-0AFD3E5BCE4D}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{2172F7C2-5654-4386-B75C-0AFD3E5BCE4D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{2172F7C2-5654-4386-B75C-0AFD3E5BCE4D}.Release|x86.ActiveCfg = Release|Any CPU
+		{2A633B32-9079-4E23-B236-F1EE41E0F650}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A633B32-9079-4E23-B236-F1EE41E0F650}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A633B32-9079-4E23-B236-F1EE41E0F650}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{2A633B32-9079-4E23-B236-F1EE41E0F650}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{2A633B32-9079-4E23-B236-F1EE41E0F650}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2A633B32-9079-4E23-B236-F1EE41E0F650}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A633B32-9079-4E23-B236-F1EE41E0F650}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A633B32-9079-4E23-B236-F1EE41E0F650}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{2A633B32-9079-4E23-B236-F1EE41E0F650}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{2A633B32-9079-4E23-B236-F1EE41E0F650}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
