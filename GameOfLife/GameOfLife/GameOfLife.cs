@@ -35,6 +35,7 @@ namespace GameOfLife
         private readonly int[] locationsOfStops = { 12, 27, 38, 149};
         
         private DataModel.DataModel model;
+        private ComputerAI.ComputerAI computer;
 
         private State gameState;
         private KeyboardState oldKeyboardState; //Az elõzõ update során érvényes billentyûzetállapot

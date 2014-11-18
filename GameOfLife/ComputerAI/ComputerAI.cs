@@ -10,7 +10,7 @@ namespace GameOfLife.ComputerAI
 {
     public class ComputerAI
     {
-        private DataModel.DataModel model;
+        private readonly DataModel.DataModel model;
 
         public ComputerAI(DataModel.DataModel receivedModel)
         {
