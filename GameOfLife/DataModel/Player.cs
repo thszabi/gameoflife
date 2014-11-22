@@ -30,6 +30,16 @@ namespace GameOfLife.DataModel
         public Player(String playerName, Boolean isFemale, Boolean isPc)
         {
             actual = false;
+            /* 0 = Szupersztár
+             * 1 = Művész
+             * 2 = Sportoló
+             * 3 = Üzletkötő
+             * 4 = Utazási ügynök
+             * 5 = Rendőr
+             * 6 = Tanár
+             * 7 = Könyvelő
+             * 8 = Orvos
+             */
             careerCard = 9;                 // 0-8 -> karrier kártya száma, 9 -> még nincs karrier kártyája
             carInsurance = false;
             children = new List<int>();
@@ -39,7 +49,7 @@ namespace GameOfLife.DataModel
             houseInsurance = false;
             lifeCardNumber = 0;
             loan = 0;
-            location = 0;                   // 0-149 -> mező száma, 0 -> start mező, 148 -> Vidéki ház, 149 -> Milliomosok nyaralója
+            location = 0;                   // 0-151 -> mező száma, 0 -> start mező, 151 -> Vidéki ház, 150 -> Milliomosok nyaralója
             loseNextRound = false;
             married = false;
             money = 0;

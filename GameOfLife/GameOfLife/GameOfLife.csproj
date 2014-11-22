@@ -116,6 +116,10 @@
     <Content Include="GameThumbnail.png" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ComputerAI\ComputerAI.csproj">
+      <Project>{2a633b32-9079-4e23-b236-f1ee41e0f650}</Project>
+      <Name>ComputerAI</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DataModel\DataModel.csproj">
       <Project>{2172f7c2-5654-4386-b75c-0afd3e5bce4d}</Project>
       <Name>DataModel</Name>

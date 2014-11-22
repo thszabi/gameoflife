@@ -16,8 +16,8 @@ namespace GameOfLife
     /// </summary>
     public class GameOfLife : Microsoft.Xna.Framework.Game
     {
-        enum State { MAINMENU, INSTRUCTIONS, LOADGAME, QUITTING, NUMBEROFPLAYERS, COLLEGEORCAREER, 
-                     PLAYERSTURN, SAVEGAME, MOVING, CHOOSESTOCK, CHOOSEJOB, CHOOSESALARY, 
+        enum State { MAINMENU, INSTRUCTIONS, QUITTING, NUMBEROFPLAYERS, COLLEGEORCAREER, 
+                     PLAYERSTURN, MOVING, CHOOSESTOCK, CHOOSEJOB, CHOOSESALARY, 
                      CHANGEJOB, ATFORK1, ATFORK2, TRADESALARY, TRADEWITHWHO, CHOOSERETIREMENT };
 
         #region Variables for Update
@@ -33,6 +33,10 @@ namespace GameOfLife
         /// A STOP mezõk sorszámai
         /// </summary>
         private readonly int[] locationsOfStops = { 12, 27, 38, 149};
+
+        private readonly int[] locationsOfLIFEs = { 4, 7, 9, 11, 18, 20, 23, 24, 29, 37, 53, 54, 
+                                                    63, 65, 66, 71, 74, 83, 89, 100, 103, 104, 
+                                                    123, 130, 132, 135, 138, 140, 142, 144 };
         
         private DataModel.DataModel model;
         private ComputerAI.ComputerAI computer;
@@ -74,7 +78,13 @@ namespace GameOfLife
         /// </summary>
         private int[] numberOfPlayers;
 
-        private int stepsLeft;
+        private bool gameEnded; //Igaz, ha mindenki a célba ért, és kiírásra került a végeredmény. 
+        private double elapsedSinceMoving; //Mennyi idõ telt el az utolsó stepForward óta
+        
+        private int stepsLeft; //Hányat lép még a játékos a pörgetés után
+        private int numberSpun; //Hányat pörgetett a játékos
+        private int[] threeCareers;
+        private int[] threeSalaries;
 
 
 
@@ -123,6 +133,8 @@ namespace GameOfLife
         private SpriteFont instructionsFont;
         private SpriteFont titleFont;
 
+        private String output; //Ez a szöveg jelenik meg a bal felsõ sarokban. Ez mindig látható, ezzel tájékoztatjuk a játékost
+
         private Texture2D palya2;
 
         #endregion
@@ -162,7 +174,13 @@ namespace GameOfLife
             oldKeyboardState = Keyboard.GetState();
             newKeyboardState = Keyboard.GetState();
 
+            gameEnded = true;
+            elapsedSinceMoving = 0;
+            
             stepsLeft = 0;
+            numberSpun = 0;
+
+            output = "";
 
             base.Initialize();
         }
@@ -248,6 +266,7 @@ namespace GameOfLife
 
             switch (gameState)
             {
+                #region Update: MAINMENU
                 case State.MAINMENU:
                     //"Fel" lekezelése - kurzor felfelé léptetése
                     if (oldKeyboardState.IsKeyUp(Keys.Up) && newKeyboardState.IsKeyDown(Keys.Up))
@@ -268,6 +287,7 @@ namespace GameOfLife
                             case 0: //Új játék
                                 gameState = State.NUMBEROFPLAYERS;
                                 arrowPosition = 0;
+                                gameEnded = false;
                                 numberOfPlayers = new int[6];
                                 for (int i = 0; i < 6; ++i)
                                 {
@@ -292,7 +312,9 @@ namespace GameOfLife
                         }//switch(arrowPosition)
                     }//Space/Enter lekezelése
                     break;
+                #endregion
 
+                #region Update: INSTRUCTIONS
                 case State.INSTRUCTIONS:
                     //"Esc", "Space", "Enter" lekezelése - visszalépés
                     if ((oldKeyboardState.IsKeyUp(Keys.Escape) && newKeyboardState.IsKeyDown(Keys.Escape)) ||
@@ -302,7 +324,9 @@ namespace GameOfLife
                         gameState = State.MAINMENU;
                     }
                     break;
+                #endregion
 
+                #region Update: NUMBEROFPLAYERS
                 case State.NUMBEROFPLAYERS:
                     //"Jobbra" lekezelése - következõ képre mutat a kurzor
                     if (oldKeyboardState.IsKeyUp(Keys.Right) && newKeyboardState.IsKeyDown(Keys.Right))
@@ -342,41 +366,50 @@ namespace GameOfLife
                         {
                             List<Tuple<string, bool, bool>> playerList = new List<Tuple<string, bool, bool>>();
 
+                            int i = 0;
                             foreach (int player in numberOfPlayers)
                             {
                                 switch (player)
                                 {
                                     case 1: //Férfi és ember
-                                        playerList.Add(new Tuple<string, bool, bool>(player+". játékos", false, false));
+                                        ++i;
+                                        playerList.Add(new Tuple<string, bool, bool>(i+". játékos", false, false));
                                         break;
                                     case 2: //Nõ és ember
-                                        playerList.Add(new Tuple<string, bool, bool>(player+". játékos", true, false));
+                                        ++i;
+                                        playerList.Add(new Tuple<string, bool, bool>(i+". játékos", true, false));
                                         break;
                                     case 3: //Férfi és gép
-                                        playerList.Add(new Tuple<string, bool, bool>(player+". játékos", false, true));
+                                        ++i;
+                                        playerList.Add(new Tuple<string, bool, bool>(i+". játékos", false, true));
                                         break;
                                     case 4: //Nõ és gép
-                                        playerList.Add(new Tuple<string, bool, bool>(player+". játékos", true, true));
+                                        ++i;
+                                        playerList.Add(new Tuple<string, bool, bool>(i+". játékos", true, true));
                                         break;
                                 }
                             }
                             
                             model = new DataModel.DataModel(noOfPlayers, playerList);
-                            gameState = State.PLAYERSTURN;
+                            computer = new ComputerAI.ComputerAI(model);
+                            stepsLeft = 0;
+                            numberSpun = 0;
                             arrowPosition = 0;
-                            //QUESTION: A currentPlayer-t én állítgatom, vagy a model?
+                            model.ActualPlayer = 0;
+                            gameState = State.PLAYERSTURN;
                         }
                     }
                     break;
+                #endregion
 
+                #region Update: PLAYERSTURN
                 case State.PLAYERSTURN:
-                    //TODO gép-e vagy sem
                     if (model.PlayerLocation(model.ActualPlayer) != 0 &&
                         !model.IsRetired(model.ActualPlayer) &&
                         !model.PlayerLoseNextRound(model.ActualPlayer))
                     {
-                        //"Fel" lekezelése - következõ menüpontra mutat a kurzor
-                        if (oldKeyboardState.IsKeyUp(Keys.Up) && newKeyboardState.IsKeyDown(Keys.Up))
+                        //"Fel" lekezelése - következõ menüpontra mutat a kurzor. De csak akkor, ha nem gép köre van
+                        if (oldKeyboardState.IsKeyUp(Keys.Up) && newKeyboardState.IsKeyDown(Keys.Up) && !model.PlayerPc(model.ActualPlayer))
                         {
                             arrowPosition = (arrowPosition + 1) % 7;
                             //Ha van biztosítása, arra a menüpontra nem mutathat a kurzor (nem vehet még egyet)
@@ -400,8 +433,8 @@ namespace GameOfLife
                                 ++arrowPosition;
                             }
                         }
-                        //"Le" lekezelése - elõzõ menüpontra mutat a kurzor
-                        if (oldKeyboardState.IsKeyUp(Keys.Down) && newKeyboardState.IsKeyDown(Keys.Down))
+                        //"Le" lekezelése - elõzõ menüpontra mutat a kurzor. De csak akkor, ha nem gép köre van
+                        if (oldKeyboardState.IsKeyUp(Keys.Down) && newKeyboardState.IsKeyDown(Keys.Down) && !model.PlayerPc(model.ActualPlayer))
                         {
                             arrowPosition = arrowPosition == 0 ? 6 : arrowPosition - 1;
                             //Ha nincs kölcsöne, a visszafizetés menüpontra nem mutathat a kurzor (nem vehet még egyet)
@@ -425,9 +458,18 @@ namespace GameOfLife
                                 --arrowPosition;
                             }
                         }
+
+                        //Ha gép köre van, õ dönt
+                        if (model.PlayerPc(model.ActualPlayer))
+                        {
+                            arrowPosition = computer.computerTurn();
+                        }
+
                         //"Space" és "Enter" lekezelése - menüpont aktiválása
-                        if ((oldKeyboardState.IsKeyUp(Keys.Space) && newKeyboardState.IsKeyDown(Keys.Space)) ||
-                            (oldKeyboardState.IsKeyUp(Keys.Enter) && newKeyboardState.IsKeyDown(Keys.Enter)))
+                        //Vagy ha gép köre van, akkor az elõbb meghozott döntést aktiváljuk
+                        if ((oldKeyboardState.IsKeyUp(Keys.Space) && newKeyboardState.IsKeyDown(Keys.Space) && !model.PlayerPc(model.ActualPlayer)) ||
+                            (oldKeyboardState.IsKeyUp(Keys.Enter) && newKeyboardState.IsKeyDown(Keys.Enter) && !model.PlayerPc(model.ActualPlayer)) ||
+                            model.PlayerPc(model.ActualPlayer))
                         {
                             switch (arrowPosition)
                             {
@@ -480,29 +522,12 @@ namespace GameOfLife
                                     break;
 
                                 case 6: //Kilépés
-                                    //TODO kilépés
+                                    arrowPosition = 0;
+                                    gameState = State.MAINMENU;
                                     break;
 
                                 default: //Pörgetés
-                                    Tuple<int, int> spinResult = model.Spin(model.ActualPlayer);
-                                    stepsLeft = spinResult.Item1;
-                                    
-                                    //Ha valaki pénzt kapott
-                                    if (spinResult.Item2 != -1)
-                                    {
-                                        if (spinResult.Item1 == 10)
-                                        {
-                                            //TODO kimenet: gyorshajtás! Az x. játékos kap 10.000-ret
-                                        }
-                                        else
-                                        {
-                                            //TODO kimenet: az x. játékos kap 10.000-ret a részvénye miatt.
-                                        }
-                                    }
-
-                                    //Pörgetés után jön a léptetés
-                                    gameState = State.MOVING;
-
+                                    spin();
                                     break;
                             }
                         }
@@ -513,37 +538,55 @@ namespace GameOfLife
                         if (model.PlayerLocation(model.ActualPlayer) == 0)
                         {
                             gameState = State.COLLEGEORCAREER;
+                            output = "Egyetem (1-es gomb) vagy karrier (2-es gomb)?";
                         }
-                        //Ha a játékos már nyugdíjba vonult vagy kimarad egy körbõl
-                        else
+
+                        //Ha a játékos kimarad egy körbõl
+                        if (model.PlayerLoseNextRound(model.ActualPlayer))
                         {
-                            model.NextPlayer();
+                            //TODO kimenet = a játékos kimaradt egy körbõl, megint te következel!
+                            model.SetLoseNextRound(model.ActualPlayer, false);
+                            EndTurn();
+                        }
+
+                        //Ha a játékos már nyugdíjas
+                        if (model.IsRetired(model.ActualPlayer))
+                        {
+                            EndTurn();
                         }
                     }
                     break;
+                #endregion
 
+                #region Update: COLLEGEORCAREER
                 case State.COLLEGEORCAREER:
-                    //"1" lekezelése - a játékos az egyetemet választotta
-                    if (oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1))
+                    //"1" lekezelése, ha nem gép köre van - a játékos az egyetemet választotta
+                    //Ha gép köre van, és "1"-et mondott, akkor lekezeljük
+                    if ((oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1) && !model.PlayerPc(model.ActualPlayer)) ||
+                        (model.PlayerPc(model.ActualPlayer) && computer.firstFork() == Keys.D1) )
                     {
                         model.SetPlayerLocation(model.ActualPlayer,1);
-                        //TODO GiveLoanOnly
-                        model.GetLoan(model.ActualPlayer, 40000);
-                        model.PayMoney(model.ActualPlayer, 40000);
+                        model.GetStudentLoan(model.ActualPlayer);
 
                         gameState = State.PLAYERSTURN;
+                        output = "";
                     }
-                    //"2" lekezelése - a játékos a karriert választotta
-                    if (oldKeyboardState.IsKeyUp(Keys.D2) && newKeyboardState.IsKeyDown(Keys.D2))
+                    //"2" lekezelése, ha nem gép köre van - a játékos a karriert választotta
+                    //Ha gép köre van, és "2"-t mondott, akkor lekezeljük
+                    if ((oldKeyboardState.IsKeyUp(Keys.D2) && newKeyboardState.IsKeyDown(Keys.D2) && !model.PlayerPc(model.ActualPlayer)) ||
+                        (model.PlayerPc(model.ActualPlayer) && computer.firstFork() == Keys.D2) )
                     {
                         model.SetPlayerLocation(model.ActualPlayer,13);
                         model.GiveCareer(model.ActualPlayer);
                         model.GiveSalary(model.ActualPlayer);
 
                         gameState = State.PLAYERSTURN;
+                        output = "";
                     }
                     break;
+                #endregion
 
+                #region Update: MOVING
                 case State.MOVING:
                     //Az 50. mezõ után elágazás következik
                     if (model.PlayerLocation(model.ActualPlayer) == 50)
@@ -558,122 +601,458 @@ namespace GameOfLife
 
                     if (gameState == State.MOVING && stepsLeft != 0)
                     {
-                        stepForward();
-                        //TODO várakozás
+                        elapsedSinceMoving += gameTime.ElapsedGameTime.TotalMilliseconds;
+                        if (elapsedSinceMoving >= 1000) //Ha az utolsó lépés óta eltelt legalább 1 másodperc, lépünk
+                        {
+                            stepForward();
+                            elapsedSinceMoving = 0;
+                        }
+                        
                     }
                     //Ha elfogyott a lépésünk, aktiválódik a mezõ hatása
                     if (gameState == State.MOVING && stepsLeft == 0)
                     {
                         EffectOfField(model.PlayerLocation(model.ActualPlayer));
-                        model.NextPlayer();
-                        gameState = State.PLAYERSTURN;
+                        //Ha az EffectOfField nem módosította a játék állapotát, sem a hátralévõ lépések számát, akkor vége a körnek
+                        if (gameState == State.MOVING && stepsLeft == 0)
+                        {
+                            EndTurn();
+                        }
                     }
                     break;
+                #endregion
 
+                #region Update: ATFORK1
                 case State.ATFORK1:
-                    //"1" lekezelése - a játékost elõre léptetjük eggyel az 1. útvonalon
-                    if (oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1))
+                    //"1" lekezelése, ha nem gép köre van - a játékost elõre léptetjük eggyel az 1. útvonalon
+                    //Ha gép köre van, és "1"-et mondott, lekezeljük
+                    if ((oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1) && !model.PlayerPc(model.ActualPlayer)) ||
+                        (model.PlayerPc(model.ActualPlayer) && computer.atFork() == Keys.D1))
                     {
                         model.SetPlayerLocation(model.ActualPlayer, 51);
                         --stepsLeft;
                         gameState = State.MOVING;
                     }
-                    //"2" lekezelése - a játékost elõre léptetjük eggyel az 2. útvonalon
-                    if (oldKeyboardState.IsKeyUp(Keys.D2) && newKeyboardState.IsKeyDown(Keys.D2))
+                    //"2" lekezelése, ha nem gép köre van - a játékost elõre léptetjük eggyel az 2. útvonalon
+                    //Ha gép köre van, és "2"-t mondott, lekezeljük
+                    if ((oldKeyboardState.IsKeyUp(Keys.D2) && newKeyboardState.IsKeyDown(Keys.D2) && !model.PlayerPc(model.ActualPlayer)) ||
+                        (model.PlayerPc(model.ActualPlayer) && computer.atFork() == Keys.D2))
                     {
                         model.SetPlayerLocation(model.ActualPlayer, 57);
                         --stepsLeft;
                         gameState = State.MOVING;
                     }
                     break;
+                #endregion
 
+                #region Update: ATFORK2
                 case State.ATFORK2:
-                    //"1" lekezelése - a játékost elõre léptetjük eggyel az 1. útvonalon
-                    if (oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1))
+                    //"1" lekezelése, ha nem gép köre van - a játékost elõre léptetjük eggyel az 1. útvonalon
+                    //Ha gép köre van, és "1"-et mondott, lekezeljük
+                    if ((oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1) && !model.PlayerPc(model.ActualPlayer)) ||
+                        (model.PlayerPc(model.ActualPlayer) && computer.atFork() == Keys.D1))
                     {
                         model.SetPlayerLocation(model.ActualPlayer, 87);
                         --stepsLeft;
                         gameState = State.MOVING;
                     }
-                    //"2" lekezelése - a játékost elõre léptetjük eggyel az 2. útvonalon
-                    if (oldKeyboardState.IsKeyUp(Keys.D2) && newKeyboardState.IsKeyDown(Keys.D2))
+                    //"2" lekezelése, ha nem gép köre van - a játékost elõre léptetjük eggyel a 2. útvonalon
+                    //Ha gép köre van, és "2"-t mondott, lekezeljük
+                    if ((oldKeyboardState.IsKeyUp(Keys.D2) && newKeyboardState.IsKeyDown(Keys.D2) && !model.PlayerPc(model.ActualPlayer)) ||
+                        (model.PlayerPc(model.ActualPlayer) && computer.atFork() == Keys.D2))
                     {
                         model.SetPlayerLocation(model.ActualPlayer, 94);
                         --stepsLeft;
                         gameState = State.MOVING;
                     }
                     break;
+                #endregion
 
+                #region Update: CHOOSERETIREMENT
                 case State.CHOOSERETIREMENT:
-                    //"1" lekezelése - a játékos a vidéki házba megy nyugdíjba
-                    if (oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1))
+                    //Ha vége van a játéknak, akkor is ebben az állapotban vagyunk! Csak ilyenkor a gameEnded nem engedi hogy az enteren kívül bármit is nyomjunk
+
+                    //"1" lekezelése, ha nem gép köre van - a játékos a vidéki házba megy nyugdíjba
+                    //Ha gép köre van, és "1"-et mondott, lekezeljük
+                    if (!gameEnded &&
+                        ((oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1) && !model.PlayerPc(model.ActualPlayer)) ||
+                        (model.PlayerPc(model.ActualPlayer) && computer.selectRetire() == Keys.D1)))
                     {
                         model.SetPlayerLocation(model.ActualPlayer, 151);
                         model.Retire(model.ActualPlayer, false);
-                        //TODO check for ending
-                        model.NextPlayer();
-                        gameState = State.PLAYERSTURN;
-                    }
-                    //"2" lekezelése - a játékos a milliomosok nyaralójába megy nyugdíjba
-                    if (oldKeyboardState.IsKeyUp(Keys.D2) && newKeyboardState.IsKeyDown(Keys.D2))
-                    {
-                        model.SetPlayerLocation(model.ActualPlayer, 150);
-                        model.Retire(model.ActualPlayer, true);
-                        //TODO check for ending
-                        model.NextPlayer();
-                        gameState = State.PLAYERSTURN;
-                    }
-                    break;
 
-                /*Nincs kész!
-                case State.CHOOSESTOCK:
-                    //"Fel" lekezelése - a következõ elérhetõ részvényre ugrik a kurzor
-                    if (oldKeyboardState.IsKeyUp(Keys.Up) && newKeyboardState.IsKeyDown(Keys.Up))
-                    {
-                        arrowPosition = (arrowPosition + 1) % 10;
-                        while (!model.IsStockCardFree(arrowPosition) && arrowPosition != 9)
+                        //Ha mindenki nyugdíjba ment, kiszámoljuk a gyõztest, és befejezõdik a játék
+                        if (model.IsEveryoneRetired())
                         {
-                            arrowPosition = (arrowPosition + 1) % 10;
-                        }
-                    }
-                    //"Le" lekezelése - az elõzõ elérhetõ részvényre ugrik a kurzor
-                    if (oldKeyboardState.IsKeyUp(Keys.Down) && newKeyboardState.IsKeyDown(Keys.Down))
-                    {
-                        arrowPosition = arrowPosition == 0 ? 9 : arrowPosition - 1;
-                        while (!model.IsStockCardFree(arrowPosition) && arrowPosition != 9)
-                        {
-                            arrowPosition = arrowPosition == 0 ? 9 : arrowPosition - 1;
-                        }
-                    }
-                    //"Space" és "Enter" lekezelése - kiválasztott részvény megvásárlása vagy visszalépés
-                    if ((oldKeyboardState.IsKeyUp(Keys.Space) && newKeyboardState.IsKeyDown(Keys.Space)) ||
-                        (oldKeyboardState.IsKeyUp(Keys.Enter) && newKeyboardState.IsKeyDown(Keys.Enter)))
-                    {
-                        //Ha nem a "mégse"-n áll a kurzor
-                        if (arrowPosition != 9)
-                        {
-                            if (true)//(model.BuyStock(model.ActualPlayer, arrowPosition))
-                            {
-                                //TODO kimenet: sikeres részvény
-                                arrowPosition = 0;
-                            }
-                            else
-                            {
-                                //TODO kimenet: sikertelen részvény
-                                arrowPosition = 3;
-                            }
+                            int winner = model.EndGame()[0];
+                            output = model.PlayerName(winner) + " nyert!";
+                            gameEnded = true;
                         }
                         else
                         {
-                            arrowPosition = 3;
+                            EndTurn(); //Ha még nem ment mindenki nyugdíjba, akkor jön a következõ játékos
                         }
-                        gameState = State.PLAYERSTURN;
                     }
-                    break;*/
+                    //"1" lekezelése, ha nem gép köre van - a játékos a milliomosok nyaralójába megy nyugdíjba
+                    //Ha gép köre van, és "2"-t mondott, lekezeljük
+                    if (!gameEnded &&
+                        ((oldKeyboardState.IsKeyUp(Keys.D2) && newKeyboardState.IsKeyDown(Keys.D2) && !model.PlayerPc(model.ActualPlayer)) ||
+                        (model.PlayerPc(model.ActualPlayer) && computer.selectRetire() == Keys.D2)))
+                    {
+                        model.SetPlayerLocation(model.ActualPlayer, 150);
+                        model.Retire(model.ActualPlayer, true);
+
+                        //Ha mindenki nyugdíjba ment, kiszámoljuk a gyõztest, és befejezõdik a játék
+                        if (model.IsEveryoneRetired())
+                        {
+                            int winner = model.EndGame()[0];
+                            output = model.PlayerName(winner) + " nyert!";
+                            gameEnded = true;
+                        }
+                        else
+                        {
+                            EndTurn(); //Ha még nem ment mindenki nyugdíjba, akkor jön a következõ játékos
+                        }
+                    }
+
+                    //Ha vége van a játéknak, már csak egy enterre várunk, majd visszamegyünk a fõmenübe
+                    if (oldKeyboardState.IsKeyUp(Keys.Enter) && newKeyboardState.IsKeyDown(Keys.Enter) && gameEnded)
+                    {
+                        arrowPosition = 0;
+                        gameState = State.MAINMENU;
+                    }
+                    break;
+                #endregion
+
+                #region Update: CHOOSESTOCK
+                case State.CHOOSESTOCK:
+                    /* Az arrowPosition tárolja a kiválasztott részvényt
+                     * 0 -> az 1. részvényt választotta
+                     * 1 -> a  2. részvényt választotta
+                     * ...
+                     * 8 -> a  9. részvényt választotta
+                     * 9 -> még nem választott
+                     */
+
+                    //"1" lekezelése, ha nem gép köre van - 1. részvényt választotta, ha az még szabad
+                    if ((oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1) && !model.PlayerPc(model.ActualPlayer)) &&
+                        model.GetStockCardAvailability(0))
+                    {
+                        arrowPosition = 0;
+                    }
+                    if ((oldKeyboardState.IsKeyUp(Keys.D2) && newKeyboardState.IsKeyDown(Keys.D2) && !model.PlayerPc(model.ActualPlayer)) &&
+                        model.GetStockCardAvailability(1))
+                    {
+                        arrowPosition = 1;
+                    }
+                    if ((oldKeyboardState.IsKeyUp(Keys.D3) && newKeyboardState.IsKeyDown(Keys.D3) && !model.PlayerPc(model.ActualPlayer)) &&
+                        model.GetStockCardAvailability(2))
+                    {
+                        arrowPosition = 2;
+                    }
+                    if ((oldKeyboardState.IsKeyUp(Keys.D4) && newKeyboardState.IsKeyDown(Keys.D4) && !model.PlayerPc(model.ActualPlayer)) &&
+                        model.GetStockCardAvailability(3))
+                    {
+                        arrowPosition = 3;
+                    }
+                    if ((oldKeyboardState.IsKeyUp(Keys.D5) && newKeyboardState.IsKeyDown(Keys.D5) && !model.PlayerPc(model.ActualPlayer)) &&
+                        model.GetStockCardAvailability(4))
+                    {
+                        arrowPosition = 4;
+                    }
+                    if ((oldKeyboardState.IsKeyUp(Keys.D6) && newKeyboardState.IsKeyDown(Keys.D6) && !model.PlayerPc(model.ActualPlayer)) &&
+                        model.GetStockCardAvailability(5))
+                    {
+                        arrowPosition = 5;
+                    }
+                    if ((oldKeyboardState.IsKeyUp(Keys.D7) && newKeyboardState.IsKeyDown(Keys.D7) && !model.PlayerPc(model.ActualPlayer)) &&
+                        model.GetStockCardAvailability(6))
+                    {
+                        arrowPosition = 6;
+                    }
+                    if ((oldKeyboardState.IsKeyUp(Keys.D8) && newKeyboardState.IsKeyDown(Keys.D8) && !model.PlayerPc(model.ActualPlayer)) &&
+                        model.GetStockCardAvailability(7))
+                    {
+                        arrowPosition = 7;
+                    }
+                    if ((oldKeyboardState.IsKeyUp(Keys.D9) && newKeyboardState.IsKeyDown(Keys.D9) && !model.PlayerPc(model.ActualPlayer)) &&
+                        model.GetStockCardAvailability(8))
+                    {
+                        arrowPosition = 8;
+                    }
+
+                    //Ha gép köre van, akkor a gép választ
+                    if (model.PlayerPc(model.ActualPlayer))
+                    {
+                        arrowPosition = computer.buyStock();
+                    }
+                    
+                    //Ha a játékos választott, megveszi az adott részvényt
+                    if (arrowPosition != 9)
+                    {
+                        if (model.BuyStock(model.ActualPlayer, arrowPosition))
+                        {
+                            output = "Sikeresen megvásároltad a " + (arrowPosition+1) + ". részvényt.";
+                            arrowPosition = 0;
+                            gameState = State.PLAYERSTURN;
+                        }
+                        else
+                        {
+                            output = "Nincs elég pénzed részvényt vásárolni!";
+                            arrowPosition = 3;
+                            gameState = State.PLAYERSTURN;
+                        }
+                    }
+                    break;
+                #endregion
+
+                #region Update: CHOOSEJOB
+                case State.CHOOSEJOB:
+                    /* Az arrowPosition tárolja a kiválasztott munkát
+                     * 0 -> az 1. munkát választotta
+                     * 1 -> a  2. munkát választotta
+                     * 2 -> a  3. munkát választotta
+                     * 3 -> még nem választott
+                     */
+
+                    if (oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1) && !model.PlayerPc(model.ActualPlayer))
+                    {
+                        arrowPosition = 0;
+                    }
+                    if (oldKeyboardState.IsKeyUp(Keys.D2) && newKeyboardState.IsKeyDown(Keys.D2) && !model.PlayerPc(model.ActualPlayer))
+                    {
+                        arrowPosition = 1;
+                    }
+                    if (oldKeyboardState.IsKeyUp(Keys.D3) && newKeyboardState.IsKeyDown(Keys.D3) && !model.PlayerPc(model.ActualPlayer))
+                    {
+                        arrowPosition = 2;
+                    }
+
+                    //Ha gép köre van, õ dönt
+                    if (model.PlayerPc(model.ActualPlayer))
+                    {
+                        arrowPosition = computer.selectJob(threeCareers);
+                    }
+
+                    if (arrowPosition != 3)
+                    {
+                        //Beállítjuk a kiválasztott karriert
+                        model.SetCareer(model.ActualPlayer, threeCareers[arrowPosition]);
+
+                        //Beállítjuk a három fizetést, amit a munka kiválasztása után fogunk felkínálni
+                        threeSalaries = model.GiveThreeSalary();
+
+                        /*
+                        //Ha a játékos egy kék mezõ segítségével érte el a munkaváltást (azaz nem most végzett az egyetemen), akkor az elsõ fizetés az eddigi fizetése
+                        if (model.PlayerLocation(model.ActualPlayer) != 12)
+                        {
+                            threeSalaries[0] = model.PlayerSalary(model.ActualPlayer);
+                        }
+                        */
+
+                        Console.WriteLine("A három fizetés: " + threeSalaries[0] + " " + threeSalaries[1] + " " + threeSalaries[2]);
+
+                        //A karrier kiválasztása után következik a fizetés kiválasztása
+                        arrowPosition = 3;
+                        gameState = State.CHOOSESALARY;
+                    }
+
+                    break;
+                #endregion
+
+                #region Update: CHOOSESALARY
+                case State.CHOOSESALARY:
+                    /* Az arrowPosition tárolja a kiválasztott fizetést
+                     * 0 -> az 1. fizetést választotta
+                     * 1 -> a  2. fizetést választotta
+                     * 2 -> a  3. fizetést választotta
+                     * 3 -> még nem választott
+                     */
+
+                    if (oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1) && !model.PlayerPc(model.ActualPlayer))
+                    {
+                        arrowPosition = 0;
+                    }
+                    if (oldKeyboardState.IsKeyUp(Keys.D2) && newKeyboardState.IsKeyDown(Keys.D2) && !model.PlayerPc(model.ActualPlayer))
+                    {
+                        arrowPosition = 1;
+                    }
+                    if (oldKeyboardState.IsKeyUp(Keys.D3) && newKeyboardState.IsKeyDown(Keys.D3) && !model.PlayerPc(model.ActualPlayer))
+                    {
+                        arrowPosition = 2;
+                    }
+
+                    //Ha gép köre van, õ dönt
+                    if (model.PlayerPc(model.ActualPlayer))
+                    {
+                        arrowPosition = computer.selectSalary(threeSalaries);
+                    }
+
+                    if (arrowPosition != 3)
+                    {
+                        //Beállítjuk a kiválasztott fizetést
+                        model.SetSalary(model.ActualPlayer, threeSalaries[arrowPosition]);
+
+                        //Ha a játékos most végzett az egyetemen, újra pörgethet
+                        if (model.PlayerLocation(model.ActualPlayer) == 12)
+                        {
+                            spin();
+                        }
+                        else
+                        {
+                            EndTurn();
+                        }
+                    }
+
+                    break;
+                #endregion
+
+                #region Update: CHANGEJOB
+                case State.CHANGEJOB:
+
+                    //"I" lekezelése, ha nem gép köre van - elkezdjük a munkaváltást
+                    //Ha gép köre van, és szeretne munkát váltani, lekezeljük
+                    if ((oldKeyboardState.IsKeyUp(Keys.I) && newKeyboardState.IsKeyDown(Keys.I) && !model.PlayerPc(model.ActualPlayer)) ||
+                        (model.PlayerPc(model.ActualPlayer) && computer.blueFieldChangeJob()))
+                    {
+                        //Fizetünk a tanárnak 20000-et
+                        careerField(20000, 6);
+
+                        //Kisorsoljuk a három állást, amelybõl az 1. az eddigi munkája
+                        threeCareers = model.GiveThreeCareer();
+                        threeCareers[0] = model.PlayerCareerCard(model.ActualPlayer);
+
+                        Console.WriteLine("A három karrier: " + threeCareers[0] + " " + threeCareers[1] + " " + threeCareers[2]);
+                        arrowPosition = 3; //== még nem választott
+                        gameState = State.CHOOSEJOB;
+                    }
+
+                    //"N" lekezelése, ha nem gép köre van - vége van a körnek
+                    //Ha gép köre van, és nem szeretne munkát váltani, lekezeljük
+                    if ((oldKeyboardState.IsKeyUp(Keys.N) && newKeyboardState.IsKeyDown(Keys.N) && !model.PlayerPc(model.ActualPlayer)) ||
+                        (model.PlayerPc(model.ActualPlayer) && !computer.blueFieldChangeJob()))
+                    {
+                        EndTurn();
+                    }
+                    break;
+                #endregion
+
+                #region Update: TRADESALARY
+                case State.TRADESALARY:
+
+                    //"I" lekezelése, ha nem gép köre van - elkezdjük a cserét
+                    //Ha gép köre van, és szeretne cserélni, lekezeljük
+                    if ((oldKeyboardState.IsKeyUp(Keys.I) && newKeyboardState.IsKeyDown(Keys.I) && !model.PlayerPc(model.ActualPlayer)) ||
+                        (model.PlayerPc(model.ActualPlayer) && computer.blueFieldTradeSalary()))
+                    {
+                        arrowPosition = 6; //== még nem választott
+                        gameState = State.TRADEWITHWHO;
+                    }
+
+                    //"N" lekezelése, ha nem gép köre van - vége van a körnek
+                    //Ha gép köre van, és nem szeretne cserélni, lekezeljük
+                    if ((oldKeyboardState.IsKeyUp(Keys.N) && newKeyboardState.IsKeyDown(Keys.N) && !model.PlayerPc(model.ActualPlayer)) ||
+                        (model.PlayerPc(model.ActualPlayer) && !computer.blueFieldTradeSalary()))
+                    {
+                        EndTurn();
+                    }
+                    break;
+                #endregion
+
+                #region Update: TRADEWITHWHO
+                case State.TRADEWITHWHO:
+                    /* Az arrowPosition tárolja a kiválasztott játékost
+                     * 0 -> az 1. játékost választotta
+                     * 1 -> a  2. játékost választotta
+                     * ...
+                     * 5 -> a  6. játékost választotta
+                     * 6 -> még nem választott
+                     */
+
+                    //"1" lekezelése, ha nem gép köre van, és létezik a kiválasztott játékos, és nem önmagát választotta - az 1. játékost választotta
+                    if ((oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1) && !model.PlayerPc(model.ActualPlayer)) &&
+                        model.ActualPlayer != 0 && //1. játékos indexe = 0
+                        1 <=model.NumberOfPlayers())
+                    {
+                        arrowPosition = 0;
+                    }
+                    if ((oldKeyboardState.IsKeyUp(Keys.D2) && newKeyboardState.IsKeyDown(Keys.D2) && !model.PlayerPc(model.ActualPlayer)) &&
+                        model.ActualPlayer != 1 &&
+                        2 <= model.NumberOfPlayers())
+                    {
+                        arrowPosition = 1;
+                    }
+                    if ((oldKeyboardState.IsKeyUp(Keys.D3) && newKeyboardState.IsKeyDown(Keys.D3) && !model.PlayerPc(model.ActualPlayer)) &&
+                        model.ActualPlayer != 2 &&
+                        3 <= model.NumberOfPlayers())
+                    {
+                        arrowPosition = 2;
+                    }
+                    if ((oldKeyboardState.IsKeyUp(Keys.D4) && newKeyboardState.IsKeyDown(Keys.D4) && !model.PlayerPc(model.ActualPlayer)) &&
+                        model.ActualPlayer != 3 &&
+                        4 <= model.NumberOfPlayers())
+                    {
+                        arrowPosition = 3;
+                    }
+                    if ((oldKeyboardState.IsKeyUp(Keys.D5) && newKeyboardState.IsKeyDown(Keys.D5) && !model.PlayerPc(model.ActualPlayer)) &&
+                        model.ActualPlayer != 4 &&
+                        5 <= model.NumberOfPlayers())
+                    {
+                        arrowPosition = 4;
+                    }
+                    if ((oldKeyboardState.IsKeyUp(Keys.D6) && newKeyboardState.IsKeyDown(Keys.D6) && !model.PlayerPc(model.ActualPlayer)) &&
+                        model.ActualPlayer != 5 &&
+                        6 <= model.NumberOfPlayers())
+                    {
+                        arrowPosition = 5;
+                    }
+
+                    //Ha gép köre van, õ dönt
+                    if (model.PlayerPc(model.ActualPlayer))
+                    {
+                        arrowPosition = computer.tradeSalary();
+                    }
+
+                    //Ha a játékos döntött, kicserüljük a két fizetést
+                    if (arrowPosition != 6)
+                    {
+                        model.TradeSalary(model.ActualPlayer, arrowPosition);
+                        EndTurn();
+                    }
+                    break;
+                #endregion
+
             }//switch (gameState)
 
             oldKeyboardState = newKeyboardState;
             base.Update(gameTime);
+        }
+
+        /// <summary>
+        /// Pörgetés: értéket ad a stepsLeftnek (és a numberSpunnak), kiírja, ha valaki pénzt kapott a pörgetés miatt, végül gameState=MOVING
+        /// </summary>
+        private void spin()
+        {
+            Tuple<int, int> spinResult = model.Spin(model.ActualPlayer);
+            stepsLeft = spinResult.Item1;
+            numberSpun = spinResult.Item1;
+
+            //Ha valaki pénzt kapott
+            if (spinResult.Item2 != -1)
+            {
+                if (spinResult.Item1 == 10)
+                {
+                    //TODO kimenet: gyorshajtás! Az x. játékos kap 10.000-ret
+                }
+                else
+                {
+                    //TODO kimenet: az x. játékos kap 10.000-et a részvénye miatt.
+                }
+            }
+
+            //Pörgetés után jön a léptetés
+            gameState = State.MOVING;
+            elapsedSinceMoving = 0;
         }
 
         /// <summary>
@@ -714,7 +1093,7 @@ namespace GameOfLife
 
             --stepsLeft;
 
-            Console.WriteLine(model.ActualPlayer + ". jatekos a " + model.PlayerLocation(model.ActualPlayer) + " mezore lepett. Meg " + stepsLeft + "-ot fog lepni.");
+            Console.WriteLine(model.PlayerName(model.ActualPlayer) + " a " + model.PlayerLocation(model.ActualPlayer) + " mezõre lépett. Még " + stepsLeft + "-t fog lépni.");
 
             //Ha STOP-ra lépett
             if (locationsOfStops.Contains(model.PlayerLocation(model.ActualPlayer)))
@@ -729,23 +1108,485 @@ namespace GameOfLife
                 //TODO kimenet: fizetésnap
             }
 
-            //Ha nyugdíjba kell menni, a játékosnak ki kell választania, hova megy nyugdíjba
-            if (model.PlayerLocation(model.ActualPlayer) == 149)
-            {
-                gameState = State.CHOOSERETIREMENT;
-            }
         }
 
+        //TODO ez a modellbe kell
+        private void careerField(int sum, int careerNum)
+        {
+            model.PayMoney(model.ActualPlayer, sum);
+            int payTo = model.ExistCareer(careerNum);
+            if (payTo != -1)
+            {
+                model.GiveMoney(payTo, sum);
+            }
+        }
+        
         /// <summary>
         /// Kifejti a paraméterben megadott sorszámú mezõ hatását.
         /// <param name="fieldNumber">A megadott mezõ sorszáma, melyre rálépett a játékos.</param>
         /// </summary>
         private void EffectOfField(int fieldNumber)
         {
+            if (locationsOfLIFEs.Contains(fieldNumber))
+            {
+                //TODO StealLifeCard
+                model.GetLifeCard(model.ActualPlayer);
+            }
 
+            switch (fieldNumber)
+            {
+                case 2:
+                    model.GiveMoney(model.ActualPlayer, 20000);
+                    break;
+
+                case 3:
+                case 8:
+                case 15:
+                    model.PayMoney(model.ActualPlayer, 5000);
+                    break;
+
+                case 5:
+                    model.GiveMoney(model.ActualPlayer, 5000);
+                    break;
+
+                case 6:
+                case 10:
+                case 19:
+                case 26:
+                    model.SetLoseNextRound(model.ActualPlayer, true);
+                    break;
+
+                case 12:
+                    threeCareers = model.GiveThreeCareer();
+
+                    Console.WriteLine("A három karrier: " + threeCareers[0] + " " + threeCareers[1] + " " + threeCareers[2]);
+                    arrowPosition = 3;
+                    gameState = State.CHOOSEJOB;
+                    break;
+
+                case 16:
+                case 22:
+                case 44:
+                case 75:
+                    model.GiveMoney(model.ActualPlayer, 10000);
+                    break;
+
+                case 21:
+                    careerField(5000, 8);
+                    break;
+
+                case 27:
+                    model.Marry(model.ActualPlayer);
+                    model.GetLifeCard(model.ActualPlayer);
+                    spin();
+                    break;
+
+                case 28:
+                    model.PayMoney(model.ActualPlayer, 10000);
+                    break;
+
+                case 30:
+                    careerField(10000, 3);
+                    break;
+
+                case 31:
+                    if (!model.PlayerCarInsurance(model.ActualPlayer))
+                    {
+                        model.PayMoney(model.ActualPlayer, 10000);
+                    }
+                    break;
+
+                case 32:
+                    careerField(10000, 4);
+                    break;
+
+                case 33:
+                case 70:
+                    output = "Váltasz munkát? (I/N)";
+                    gameState = State.CHANGEJOB;
+                    break;
+
+                case 35:
+                case 78:
+                case 97:
+                case 115:
+                case 128:
+                    careerField(model.PlayerTax(model.ActualPlayer),7);
+                    break;
+
+                case 36:
+                    model.GiveMoney(model.ActualPlayer, 50000);
+                    break;
+
+                case 38:
+                    model.GiveHouse(model.ActualPlayer);
+                    spin();
+                    break;
+
+                case 40:
+                case 118:
+                    model.GiveCareer(model.ActualPlayer);
+                    model.GiveSalary(model.ActualPlayer);
+                    break;
+
+                case 41:
+                case 59:
+                case 67:
+                    model.OneChild(model.ActualPlayer, false);
+                    model.GetLifeCard(model.ActualPlayer);
+                    break;
+
+                case 42:
+                case 51:
+                    careerField(5000, 3);
+                    break;
+
+                case 43:
+                case 48:
+                case 61:
+                    model.OneChild(model.ActualPlayer, true);
+                    model.GetLifeCard(model.ActualPlayer);
+                    break;
+
+                case 46:
+                case 86:
+                    model.TwoChildren(model.ActualPlayer);
+                    model.GetLifeCard(model.ActualPlayer);
+                    break; //TODO valszeg nem kell hogy fiú-e vagy lány
+
+                case 47:
+                    careerField(20000, 2);
+                    break;
+
+                case 49:
+                    careerField(5000, 0);
+                    break;
+
+                case 50:
+                    if (!model.PlayerHouseInsurance(model.ActualPlayer))
+                    {
+                        model.PayMoney(model.ActualPlayer, 40000);
+                    }
+                    break;
+
+                case 52:
+                        model.FreeStock(model.ActualPlayer);
+                    break;
+
+                case 56:
+                    if (!model.PlayerCarInsurance(model.ActualPlayer))
+                    {
+                        model.PayMoney(model.ActualPlayer, 15000);
+                    }
+                    break;
+
+                case 57:
+                    careerField(5000, 8);
+                    break;
+
+                case 58:
+                case 64:
+                case 77:
+                case 91:
+                case 109:
+                case 122:
+                case 133:
+                    output = "Elcseréled a fizetésed?";
+                    gameState = State.TRADESALARY;
+                    break;
+
+                case 62:
+                    if (!model.PlayerHouseInsurance(model.ActualPlayer))
+                    {
+                        model.PayMoney(model.ActualPlayer, 15000);
+                    }
+                    break;
+
+                case 69:
+                case 80:
+                    careerField(25000, 4);
+                    break;
+
+                case 72:
+                    careerField(20000, 1);
+                    break;
+
+                case 76:
+                case 119:
+                case 124:
+                case 129:
+                case 136:
+                case 141:
+                    if (!model.IsFirst(model.ActualPlayer))
+                    {
+                        spin();
+                    }
+                    break;
+
+                case 79:
+                    careerField(25000, 2);
+                    break;
+
+                case 82:
+                case 111:
+                    model.LoseStock(model.ActualPlayer);
+                    break;
+
+                case 84:
+                case 102:
+                    careerField(model.PlayerChildrenNumber(model.ActualPlayer) * 5000, 6);
+                    break;
+
+                case 85:
+                case 96:
+                    model.GiveMoney(model.ActualPlayer, 80000);
+                    break;
+
+                case 87:
+                    careerField(15000, 0);
+                    break;
+
+                case 90:
+                    careerField(35000, 1);
+                    break;
+
+                case 92:
+                    careerField(25000, 3);
+                    break;
+
+                case 93:
+                    model.GiveMoney(model.ActualPlayer, 75000);
+                    break;
+
+                case 94:
+                    careerField(15000, 5);
+                    break;
+
+                case 99:
+                    careerField(25000, 1);
+                    break;
+
+                case 101:
+                    model.GiveMoney(model.ActualPlayer, 95000);
+                    break;
+
+                case 105:
+                    model.PayMoney(model.ActualPlayer, 90000);
+                    break;
+
+                case 107:
+                    if (!model.PlayerHouseInsurance(model.ActualPlayer))
+                    {
+                        model.PayMoney(model.ActualPlayer, 50000);
+                    }
+                    break;
+
+                case 108:
+                    model.GiveMoney(model.ActualPlayer, 100000);
+                    break;
+
+                case 110:
+                    careerField(30000, 2);
+                    break;
+
+                case 112:
+                    if (!model.PlayerHouseInsurance(model.ActualPlayer))
+                    {
+                        model.PayMoney(model.ActualPlayer, 125000);
+                    }
+                    break;
+
+                case 114:
+                    careerField(25000, 8);
+                    break;
+
+                case 116:
+                    careerField(30000, 3);
+                    break;
+
+                case 117:
+                    careerField(35000, 2);
+                    break;
+
+                case 121:
+                    careerField(100000, 0);
+                    break;
+
+                case 125:
+                    careerField(100000, 8);
+                    break;
+
+                case 126:
+                    careerField(model.PlayerChildrenNumber(model.ActualPlayer) * 50000, 6);
+                    break;
+
+                case 131:
+                    careerField(125000, 1);
+                    break;
+
+                case 137:
+                    careerField(65000, 2);
+                    break;
+
+                case 143:
+                    careerField(45000, 4);
+                    break;
+
+                case 146:
+                    careerField(35000, 0);
+                    break;
+
+                case 147:
+                    careerField(55000, 4);
+                    break;
+
+                case 148:
+                    model.GiveMoney(model.ActualPlayer, numberSpun * 20000);
+                    break;
+
+                case 149:
+                    gameState = State.CHOOSERETIREMENT;
+                    break;
+
+
+            }//switch (fieldNumber)
         }
 
+        /// <summary>
+        /// Véget vet a körnek, és jön a következõ játékos: meghívja a model.NextPlayer()-t, és gameState=PLAYERSTURN
+        /// </summary>
+        private void EndTurn()
+        {
+            arrowPosition = 0;
+            model.NextPlayer();
+            gameState = State.PLAYERSTURN;
 
+            #region Writing to console
+
+            Console.WriteLine();
+            Console.WriteLine("A " + model.PlayerName(model.ActualPlayer) + " következik.");
+            Console.WriteLine("Hol van: " + model.PlayerLocation(model.ActualPlayer));
+            Console.WriteLine("Életkártyája: " + model.PlayerLifeCardNumber(model.ActualPlayer));
+            Console.WriteLine("Gyerekek száma: " + model.PlayerChildrenNumber(model.ActualPlayer));
+            String children = "Gyerekei: ";
+            foreach (int child in model.PlayerChildren(model.ActualPlayer))
+            {
+                children = children + child + ", ";
+            }
+            Console.WriteLine(children);
+
+            try
+            {
+                String job;
+                switch (model.PlayerCareerCard(model.ActualPlayer))
+                {
+                    case 0:
+                        job = " (Szupersztár)";
+                        break;
+
+                    case 1:
+                        job = " (Mûvész)";
+                        break;
+
+                    case 2:
+                        job = " (Sportoló)";
+                        break;
+
+                    case 3:
+                        job = " (Üzletkötõ)";
+                        break;
+
+                    case 4:
+                        job = " (Utazási ügynök)";
+                        break;
+
+                    case 5:
+                        job = " (Rendõr)";
+                        break;
+
+                    case 6:
+                        job = " (Tanár)";
+                        break;
+
+                    case 7:
+                        job = " (Könyvelõ)";
+                        break;
+
+                    case 8:
+                        job = " (Orvos)";
+                        break;
+                    default:
+                        job = " (Semmi)";
+                        break;
+                }
+                Console.WriteLine("Munkája: " + model.PlayerCareerCard(model.ActualPlayer) + job);
+            }
+            catch(Exception)
+            {
+                Console.WriteLine("Nincs munkája.");
+            }
+
+            try
+            {
+                Console.WriteLine("Fizetése: " + model.PlayerSalary(model.ActualPlayer));
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Nincs fizetése");
+            }
+
+            try
+            {
+                String house;
+                switch (model.PlayerSalary(model.ActualPlayer))
+                {
+                    case 0:
+                        house = " (40 000)";
+                        break;
+
+                    case 1:
+                        house = " (60 000)";
+                        break;
+
+                    case 2:
+                        house = " (80 000)";
+                        break;
+
+                    case 3:
+                        house = " (100 000)";
+                        break;
+
+                    case 4:
+                        house = " (120 000)";
+                        break;
+
+                    case 5:
+                        house = " (140 000)";
+                        break;
+
+                    case 6:
+                        house = " (160 000)";
+                        break;
+
+                    case 7:
+                        house = " (180 000)";
+                        break;
+
+                    case 8:
+                        house = " (200 000)";
+                        break;
+                    default:
+                        house = " (0)";
+                        break;
+                }
+                Console.WriteLine("Háza: " + model.PlayerHouseCard(model.ActualPlayer) + house);
+            }
+            catch(Exception)
+            {
+                Console.WriteLine("Nincs háza.");
+            }
+            #endregion
+        }
 
         #endregion
         #region Draw
@@ -787,7 +1628,7 @@ namespace GameOfLife
 
                     switch (numberOfPlayers[arrowPosition])
                     {
-                        case 0: //T.SZ.
+                        case 0:
                             img[arrowPosition] = emptyProfile;
                             break;
                         case 1:
@@ -814,20 +1655,15 @@ namespace GameOfLife
                     spriteBatch.Draw(arrowUp, new Rectangle(223 + (arrowPosition % 3) * 240, 383 + Convert.ToInt32(arrowPosition > 2) * 240, 31, 31), Color.White);
                     break;
 
-                case State.COLLEGEORCAREER: case State.PLAYERSTURN:
-                    spriteBatch.Draw(palya2, new Rectangle(0, 0, 956, 835), Color.White);
+                case State.COLLEGEORCAREER:
+                    DrawUI();
+                    break;
 
-                    spriteBatch.Draw(saveBtn, new Rectangle(660, 15, 105, 35), Color.White);
-                    spriteBatch.Draw(escapeBtn2, new Rectangle(820, 15, 105, 35), Color.White);
+                case State.PLAYERSTURN: //T.SZ. TODO: jöhet a case MOVING. Oda is kell egy DrawUI(), meg valahogy kirajzolni a megfelelõ helyre a bábut
+                    DrawUI();
 
-                    spriteBatch.Draw(buyHouseInsBtn, new Rectangle(343, 660, 143, 53), Color.White);
-                    spriteBatch.Draw(buyCarInsBtn, new Rectangle(526, 660, 143, 53), Color.White);
-                    spriteBatch.Draw(buyStockBtn, new Rectangle(343, 743, 143, 53), Color.White);
-                    spriteBatch.Draw(payBackLoanBtn, new Rectangle(526, 743, 143, 53), Color.White);
-
-                    spriteBatch.Draw(spinBtn, new Rectangle(60, 680, 143, 97), Color.White);
                     int arrowX, arrowY;
-                    switch(arrowPosition)
+                    switch (arrowPosition)
                     {
                         case 0:
                             arrowX = 26; arrowY = 713; break;
@@ -844,47 +1680,8 @@ namespace GameOfLife
                         default:
                             arrowX = 786; arrowY = 18; break;
                     }
+
                     spriteBatch.Draw(arrow, new Rectangle(arrowX, arrowY, 31, 31), Color.White);
-
-                    String playersName = model.PlayerName(model.ActualPlayer);
-                    spriteBatch.DrawString(titleFont, playersName, new Vector2(20, 595), Color.White);
-                    String playersMoney = "$ " + model.PlayerMoney(model.ActualPlayer).ToString();
-                    spriteBatch.DrawString(titleFont, playersMoney, new Vector2(250, 595), Color.White);
-                    String playersLoan = "$ " + model.PlayerLoan(model.ActualPlayer).ToString();
-                    spriteBatch.DrawString(titleFont, playersLoan, new Vector2(430, 595), Color.White);
-                    String playersCard = model.PlayerLifeCardNumber(model.ActualPlayer).ToString();
-                    spriteBatch.DrawString(titleFont, playersCard, new Vector2(630, 595), Color.White);
-
-                    if (gameState == State.COLLEGEORCAREER)
-                    {
-                        String choose = "Egyetem (1-es gomb) vagy karrier (2-es gomb)?";
-                        spriteBatch.DrawString(titleFont, choose, new Vector2(10, 10), Color.White);
-                    }
-
-                    if (model.PlayerGender(model.ActualPlayer)) { 
-                        spriteBatch.Draw(girl, new Rectangle(780, 595, 20, 52), Color.White);
-                        if (model.PlayerMarried(model.ActualPlayer)) {
-                            spriteBatch.Draw(boy, new Rectangle(805, 594, 20, 52), Color.White);
-                            if (model.PlayerChildrenNumber(model.ActualPlayer) >= 1){
-                                spriteBatch.Draw(empty, new Rectangle(830, 595, 20, 52), Color.White);
-                                if (model.PlayerChildrenNumber(model.ActualPlayer) == 2) {
-                                    spriteBatch.Draw(empty, new Rectangle(855, 595, 20, 52), Color.White);
-                                }
-                            }
-                        }
-                    }
-                    else {
-                        spriteBatch.Draw(boy, new Rectangle(775, 588, 20, 52), Color.White);
-                        if (model.PlayerMarried(model.ActualPlayer)) {
-                            spriteBatch.Draw(girl, new Rectangle(805, 594, 20, 52), Color.White);
-                            if (model.PlayerChildrenNumber(model.ActualPlayer) >= 1){
-                                spriteBatch.Draw(empty, new Rectangle(830, 595, 20, 52), Color.White);
-                                if (model.PlayerChildrenNumber(model.ActualPlayer) == 2) {
-                                    spriteBatch.Draw(empty, new Rectangle(855, 595, 20, 52), Color.White);
-                                }
-                            }
-                        }
-                    }
                     break;
             }
 
@@ -892,7 +1689,69 @@ namespace GameOfLife
             base.Draw(gameTime);
         }
 
+        private void DrawUI() //T.SZ. kiemeltem a közös részt. A kurzor kirajzolása nincs benne
+        {
+            /* Ezt a függvényt a következõképp kell használni.
+            Egyáltalán nem kell használni:                   MAINMENU, INSTRUCTIONS, NUMBEROFPLAYERS
+            Használni kell, majd utána a kurzort kirajzolni: PLAYERSTURN
+            Használni kell, de utána nem kell a kurzor:      QUITTING, COLLEGEORCAREER, MOVING, CHOOSESTOCK, CHOOSEJOB, CHOOSESALARY, CHANGEJOB, ATFORK1, ATFORK2, TRADESALARY, TRADEWITHWHO, CHOOSERETIREMENT
+            */
+            spriteBatch.Draw(palya2, new Rectangle(0, 0, 956, 835), Color.White);
 
+            spriteBatch.Draw(saveBtn, new Rectangle(660, 15, 105, 35), Color.White);
+            spriteBatch.Draw(escapeBtn2, new Rectangle(820, 15, 105, 35), Color.White);
+
+            spriteBatch.Draw(buyHouseInsBtn, new Rectangle(343, 660, 143, 53), Color.White);
+            spriteBatch.Draw(buyCarInsBtn, new Rectangle(526, 660, 143, 53), Color.White);
+            spriteBatch.Draw(buyStockBtn, new Rectangle(343, 743, 143, 53), Color.White);
+            spriteBatch.Draw(payBackLoanBtn, new Rectangle(526, 743, 143, 53), Color.White);
+
+            spriteBatch.Draw(spinBtn, new Rectangle(60, 680, 143, 97), Color.White);
+
+            String playersName = model.PlayerName(model.ActualPlayer);
+            spriteBatch.DrawString(titleFont, playersName, new Vector2(20, 595), Color.White);
+            String playersMoney = "$ " + model.PlayerMoney(model.ActualPlayer).ToString();
+            spriteBatch.DrawString(titleFont, playersMoney, new Vector2(250, 595), Color.White);
+            String playersLoan = "$ " + model.PlayerLoan(model.ActualPlayer).ToString();
+            spriteBatch.DrawString(titleFont, playersLoan, new Vector2(430, 595), Color.White);
+            String playersCard = model.PlayerLifeCardNumber(model.ActualPlayer).ToString();
+            spriteBatch.DrawString(titleFont, playersCard, new Vector2(630, 595), Color.White);
+
+            spriteBatch.DrawString(titleFont, output, new Vector2(10, 10), Color.White); //T.SZ. itt volt egy if gameState = COLLEGEORCAREER, de már nem kell, ugyanis az outputot mindig ki kell írni a bal felsõ sarokba. A tartalmát az update adja meg
+
+            if (model.PlayerGender(model.ActualPlayer))
+            {
+                spriteBatch.Draw(girl, new Rectangle(780, 595, 20, 52), Color.White);
+                if (model.PlayerMarried(model.ActualPlayer))
+                {
+                    spriteBatch.Draw(boy, new Rectangle(805, 594, 20, 52), Color.White);
+                    if (model.PlayerChildrenNumber(model.ActualPlayer) >= 1)
+                    {
+                        spriteBatch.Draw(empty, new Rectangle(830, 595, 20, 52), Color.White);
+                        if (model.PlayerChildrenNumber(model.ActualPlayer) == 2)
+                        {
+                            spriteBatch.Draw(empty, new Rectangle(855, 595, 20, 52), Color.White);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                spriteBatch.Draw(boy, new Rectangle(775, 588, 20, 52), Color.White);
+                if (model.PlayerMarried(model.ActualPlayer))
+                {
+                    spriteBatch.Draw(girl, new Rectangle(805, 594, 20, 52), Color.White);
+                    if (model.PlayerChildrenNumber(model.ActualPlayer) >= 1)
+                    {
+                        spriteBatch.Draw(empty, new Rectangle(830, 595, 20, 52), Color.White);
+                        if (model.PlayerChildrenNumber(model.ActualPlayer) == 2)
+                        {
+                            spriteBatch.Draw(empty, new Rectangle(855, 595, 20, 52), Color.White);
+                        }
+                    }
+                }
+            }
+        }
 
         #endregion
     }

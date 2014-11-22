@@ -4,5 +4,7 @@ GameOfLife/GameOfLife/bin/
 GameOfLife/GameOfLife/obj/
 GameOfLife/GameOfLifeContent/bin/
 GameOfLife/GameOfLifeContent/obj/
+GameOfLife/ComputerAI/bin/
+GameOfLife/ComputerAI/obj/
 *.suo
 *.cachefile
