@@ -129,6 +129,57 @@ namespace GameOfLife
         private Texture2D buyHouseInsBtn;
         private Texture2D buyStockBtn;
 
+        private Texture2D houseInsImg;
+        private Texture2D carInsImg;
+
+        private Texture2D houseImg;
+        private Texture2D collegeImg;
+        private Texture2D careerImg;
+
+
+        Texture2D[] stockes = new Texture2D[9];
+        private Texture2D stock1;
+        private Texture2D stock2;
+        private Texture2D stock3;
+        private Texture2D stock4;
+        private Texture2D stock5;
+        private Texture2D stock6;
+        private Texture2D stock7;
+        private Texture2D stock8;
+        private Texture2D stock9;
+
+        Texture2D[] careers = new Texture2D[9];
+        private Texture2D career1;
+        private Texture2D career2;
+        private Texture2D career3;
+        private Texture2D career4;
+        private Texture2D career5;
+        private Texture2D career6;
+        private Texture2D career7;
+        private Texture2D career8;
+        private Texture2D career9;
+
+        Texture2D[] houses = new Texture2D[9];
+        private Texture2D house1;
+        private Texture2D house2;
+        private Texture2D house3;
+        private Texture2D house4;
+        private Texture2D house5;
+        private Texture2D house6;
+        private Texture2D house7;
+        private Texture2D house8;
+        private Texture2D house9;
+
+        Texture2D[] salaries = new Texture2D[9];
+        private Texture2D salary1;
+        private Texture2D salary2;
+        private Texture2D salary3;
+        private Texture2D salary4;
+        private Texture2D salary5;
+        private Texture2D salary6;
+        private Texture2D salary7;
+        private Texture2D salary8;
+        private Texture2D salary9;
 
         private SpriteFont instructionsFont;
         private SpriteFont titleFont;
@@ -225,6 +276,89 @@ namespace GameOfLife
             buyCarInsBtn = Content.Load<Texture2D>("buy_car_ins_btn");
             buyHouseInsBtn = Content.Load<Texture2D>("buy_house_ins_btn");
             buyStockBtn = Content.Load<Texture2D>("buy_stock_btn");
+
+            houseInsImg = Content.Load<Texture2D>("house_ins");
+            carInsImg = Content.Load<Texture2D>("car_ins");
+
+            houseImg = Content.Load<Texture2D>("house");
+            collegeImg = Content.Load<Texture2D>("college");
+            careerImg = Content.Load<Texture2D>("career");
+
+            stock1 = Content.Load<Texture2D>("stock_1");
+            stock2 = Content.Load<Texture2D>("stock_2");
+            stock3 = Content.Load<Texture2D>("stock_3");
+            stock4 = Content.Load<Texture2D>("stock_4");
+            stock5 = Content.Load<Texture2D>("stock_5");
+            stock6 = Content.Load<Texture2D>("stock_6");
+            stock7 = Content.Load<Texture2D>("stock_7");
+            stock8 = Content.Load<Texture2D>("stock_8");
+            stock9 = Content.Load<Texture2D>("stock_9");
+            stockes[0] = stock1;
+            stockes[1] = stock2;
+            stockes[2] = stock3;
+            stockes[3] = stock4;
+            stockes[4] = stock5;
+            stockes[5] = stock6;
+            stockes[6] = stock7;
+            stockes[7] = stock8;
+            stockes[8] = stock9;
+
+            career1 = Content.Load<Texture2D>("career1");
+            career2 = Content.Load<Texture2D>("career2");
+            career3 = Content.Load<Texture2D>("career3");
+            career4 = Content.Load<Texture2D>("career4");
+            career5 = Content.Load<Texture2D>("career5");
+            career6 = Content.Load<Texture2D>("career6");
+            career7 = Content.Load<Texture2D>("career7");
+            career8 = Content.Load<Texture2D>("career8");
+            career9 = Content.Load<Texture2D>("career9");
+            careers[0] = career1;
+            careers[1] = career2;
+            careers[2] = career3;
+            careers[3] = career4;
+            careers[4] = career5;
+            careers[5] = career6;
+            careers[6] = career7;
+            careers[7] = career8;
+            careers[8] = career9;
+
+            salary1 = Content.Load<Texture2D>("salary1");
+            salary2 = Content.Load<Texture2D>("salary2");
+            salary3 = Content.Load<Texture2D>("salary3");
+            salary4 = Content.Load<Texture2D>("salary4");
+            salary5 = Content.Load<Texture2D>("salary5");
+            salary6 = Content.Load<Texture2D>("salary6");
+            salary7 = Content.Load<Texture2D>("salary7");
+            salary8 = Content.Load<Texture2D>("salary8");
+            salary9 = Content.Load<Texture2D>("salary9");
+            salaries[0] = salary1;
+            salaries[1] = salary2;
+            salaries[2] = salary3;
+            salaries[3] = salary4;
+            salaries[4] = salary5;
+            salaries[5] = salary6;
+            salaries[6] = salary7;
+            salaries[7] = salary8;
+            salaries[8] = salary9;
+
+            house1 = Content.Load<Texture2D>("house1");
+            house2 = Content.Load<Texture2D>("house2");
+            house3 = Content.Load<Texture2D>("house3");
+            house4 = Content.Load<Texture2D>("house4");
+            house5 = Content.Load<Texture2D>("house5");
+            house6 = Content.Load<Texture2D>("house6");
+            house7 = Content.Load<Texture2D>("house7");
+            house8 = Content.Load<Texture2D>("house8");
+            house9 = Content.Load<Texture2D>("house9");
+            houses[0] = house1;
+            houses[1] = house2;
+            houses[2] = house3;
+            houses[3] = house4;
+            houses[4] = house5;
+            houses[5] = house6;
+            houses[6] = house7;
+            houses[7] = house8;
+            houses[8] = house9;
 
             instructionsFont = Content.Load<SpriteFont>("Instructions");
             titleFont = Content.Load<SpriteFont>("Instructions_title");
@@ -1605,6 +1739,7 @@ namespace GameOfLife
 
             switch (gameState)
             {
+                #region Draw: MAINMENU
                 case State.MAINMENU:
                     spriteBatch.Draw(menuBackground, new Rectangle(0, 0, 956, 835), Color.White);
 
@@ -1614,7 +1749,9 @@ namespace GameOfLife
                     spriteBatch.Draw(escapeBtn, new Rectangle(400, 604, 158, 58), Color.White);
                     spriteBatch.Draw(arrow, new Rectangle(365, 383 + arrowPosition * 78, 31, 31), Color.White);
                     break;
+                #endregion;
 
+                #region Draw: INSTRUCTIONS
                 case State.INSTRUCTIONS:
                     GraphicsDevice.Clear(new Color(51,88,161));
                     String title = "A JÁTÉK SZABÁLYAI";
@@ -1622,7 +1759,9 @@ namespace GameOfLife
                     spriteBatch.DrawString(titleFont, title, new Vector2(30, 30), Color.White);
                     spriteBatch.DrawString(instructionsFont, instructions, new Vector2(30, 70), Color.White);
                     break;
+                #endregion
 
+                #region Draw: NUMBEROFPLAYERS
                 case State.NUMBEROFPLAYERS:
                     spriteBatch.Draw(choosePlayerBackground, new Rectangle(0, 0, 956, 835), Color.White);
 
@@ -1654,11 +1793,91 @@ namespace GameOfLife
 
                     spriteBatch.Draw(arrowUp, new Rectangle(223 + (arrowPosition % 3) * 240, 383 + Convert.ToInt32(arrowPosition > 2) * 240, 31, 31), Color.White);
                     break;
+                #endregion
 
+                #region Draw: COLLEGEORCAREER
                 case State.COLLEGEORCAREER:
                     DrawUI();
                     break;
+                #endregion
 
+                #region Draw: ATFORK1
+                case State.ATFORK1:
+                    DrawUI();
+                    break;
+                #endregion
+
+                #region Draw: ATFORK2
+                case State.ATFORK2:
+                    DrawUI();
+                    break;
+                #endregion
+
+                #region Draw: CHANGEJOB
+                case State.CHANGEJOB:
+                    DrawUI();
+                    break;
+                #endregion
+
+                #region Draw: CHOOSEJOB
+                case State.CHOOSEJOB:
+                    DrawUI();
+                    for (int i = 0; i < 3; ++i)
+                    {
+                        spriteBatch.Draw(careers[threeCareers[i]], new Rectangle(233 + (i % 3) * 170, 265, 150, 230), Color.White);
+                    }
+                    break;
+                #endregion
+
+                #region Draw: CHOOSERETIREMENT
+                case State.CHOOSERETIREMENT:
+                    DrawUI();
+                    break;
+                #endregion
+
+                #region Draw: CHOOSESALARY
+                case State.CHOOSESALARY:
+                    DrawUI();
+                    for (int i = 0; i < 3; ++i)
+                    {
+                        spriteBatch.Draw(salaries[threeSalaries[i]], new Rectangle(233 + (i % 3) * 170, 265, 150, 230), Color.White);
+                    }
+                    break;
+                #endregion
+
+                #region Draw: TRADEWITHWHO
+                case State.TRADEWITHWHO:
+                    DrawUI();
+                    break;
+                #endregion
+
+                #region Draw: TRADESALARY
+                case State.TRADESALARY:
+                    DrawUI();
+                    break;
+                #endregion
+
+                #region Draw: CHOOSESTOCK
+                case State.CHOOSESTOCK:
+                    DrawUI();
+                    for (int i = 0; i < 9; ++i)
+                    {
+                        if (model.GetStockCardAvailability(i))
+                        {
+                            spriteBatch.Draw(stockes[i], new Rectangle(78 + (i % 5) * 160, 65 + (Convert.ToInt32(i > 4)) * 240, 150, 230), Color.White);
+                        }
+                    }
+                    break;
+                #endregion
+
+                #region Draw: MOVING
+                case State.MOVING:
+                    DrawUI();
+                    spriteBatch.DrawString(titleFont, numberSpun.ToString(), new Vector2(240, 710), Color.White);
+                    break;
+                #endregion
+
+                #region Draw: PLAYERSTURN
                 case State.PLAYERSTURN: //T.SZ. TODO: jöhet a case MOVING. Oda is kell egy DrawUI(), meg valahogy kirajzolni a megfelelõ helyre a bábut
                     DrawUI();
 
@@ -1683,6 +1902,7 @@ namespace GameOfLife
 
                     spriteBatch.Draw(arrow, new Rectangle(arrowX, arrowY, 31, 31), Color.White);
                     break;
+                #endregion
             }
 
             spriteBatch.End();
@@ -1701,11 +1921,35 @@ namespace GameOfLife
             spriteBatch.Draw(saveBtn, new Rectangle(660, 15, 105, 35), Color.White);
             spriteBatch.Draw(escapeBtn2, new Rectangle(820, 15, 105, 35), Color.White);
 
-            spriteBatch.Draw(buyHouseInsBtn, new Rectangle(343, 660, 143, 53), Color.White);
-            spriteBatch.Draw(buyCarInsBtn, new Rectangle(526, 660, 143, 53), Color.White);
-            spriteBatch.Draw(buyStockBtn, new Rectangle(343, 743, 143, 53), Color.White);
-            spriteBatch.Draw(payBackLoanBtn, new Rectangle(526, 743, 143, 53), Color.White);
-
+            // Ha a játékosnak van háza, és még nincs otthonbiztosítása...
+            if (model.PlayerHouseCard(model.ActualPlayer) != 9 && (!model.PlayerHouseInsurance(model.ActualPlayer)))
+            {
+                spriteBatch.Draw(buyHouseInsBtn, new Rectangle(343, 660, 143, 53), Color.White);
+            }
+            //Ha a játékosnak van otthonbiztosítása...
+            else if (model.PlayerHouseInsurance(model.ActualPlayer))
+            {
+                spriteBatch.Draw(houseInsImg, new Rectangle(343, 660, 143, 53), Color.White);
+            }
+            // Ha a játékosnak még nincs jármûbiztosítása...
+            if (!model.PlayerCarInsurance(model.ActualPlayer))
+            {
+                spriteBatch.Draw(buyCarInsBtn, new Rectangle(526, 660, 143, 53), Color.White);
+            }
+            else
+            {
+                spriteBatch.Draw(carInsImg, new Rectangle(526, 660, 143, 53), Color.White);
+            }
+            // Ha a játékos még nem vásárolt részvényt...
+            if (model.PlayerStockCard(model.ActualPlayer) == 9)
+            {
+                spriteBatch.Draw(buyStockBtn, new Rectangle(343, 743, 143, 53), Color.White);
+            }
+            // Ha a játékosnak van hitele...
+            if (model.PlayerLoan(model.ActualPlayer) != 0)
+            {
+                spriteBatch.Draw(payBackLoanBtn, new Rectangle(526, 743, 143, 53), Color.White);
+            }
             spriteBatch.Draw(spinBtn, new Rectangle(60, 680, 143, 97), Color.White);
 
             String playersName = model.PlayerName(model.ActualPlayer);
@@ -1721,33 +1965,25 @@ namespace GameOfLife
 
             if (model.PlayerGender(model.ActualPlayer))
             {
-                spriteBatch.Draw(girl, new Rectangle(780, 595, 20, 52), Color.White);
+                spriteBatch.Draw(girl, new Rectangle(735, 595, 20, 52), Color.White);
                 if (model.PlayerMarried(model.ActualPlayer))
                 {
-                    spriteBatch.Draw(boy, new Rectangle(805, 594, 20, 52), Color.White);
-                    if (model.PlayerChildrenNumber(model.ActualPlayer) >= 1)
+                    spriteBatch.Draw(boy, new Rectangle(760, 594, 20, 52), Color.White);
+                    for (int i = 0; i < model.PlayerChildrenNumber(model.ActualPlayer); ++i)
                     {
-                        spriteBatch.Draw(empty, new Rectangle(830, 595, 20, 52), Color.White);
-                        if (model.PlayerChildrenNumber(model.ActualPlayer) == 2)
-                        {
-                            spriteBatch.Draw(empty, new Rectangle(855, 595, 20, 52), Color.White);
-                        }
+                        spriteBatch.Draw(empty, new Rectangle(785 + i * 17, 607, 14, 36), Color.White);
                     }
                 }
             }
             else
             {
-                spriteBatch.Draw(boy, new Rectangle(775, 588, 20, 52), Color.White);
+                spriteBatch.Draw(boy, new Rectangle(735, 594, 20, 52), Color.White);
                 if (model.PlayerMarried(model.ActualPlayer))
                 {
-                    spriteBatch.Draw(girl, new Rectangle(805, 594, 20, 52), Color.White);
-                    if (model.PlayerChildrenNumber(model.ActualPlayer) >= 1)
+                    spriteBatch.Draw(girl, new Rectangle(760, 595, 20, 52), Color.White);
+                    for (int i = 0; i < model.PlayerChildrenNumber(model.ActualPlayer); ++i)
                     {
-                        spriteBatch.Draw(empty, new Rectangle(830, 595, 20, 52), Color.White);
-                        if (model.PlayerChildrenNumber(model.ActualPlayer) == 2)
-                        {
-                            spriteBatch.Draw(empty, new Rectangle(855, 595, 20, 52), Color.White);
-                        }
+                        spriteBatch.Draw(empty, new Rectangle(785 + i * 17, 607, 14, 36), Color.White);
                     }
                 }
             }
