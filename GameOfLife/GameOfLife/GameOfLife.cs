@@ -83,8 +83,8 @@ namespace GameOfLife
         
         private int stepsLeft; //Hányat lép még a játékos a pörgetés után
         private int numberSpun; //Hányat pörgetett a játékos
-        private int[] threeCareers;
-        private int[] threeSalaries;
+        private List<Int32> threeCareers;
+        private List<Int32> threeSalaries;
 
 
 
@@ -396,6 +396,8 @@ namespace GameOfLife
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            //TODO modellbe: ha valaki nem egyetemista, ne kapjon egyetemista munkát
+            //TODO Drawba:   részvény megjelenítése, ha vett egyet
             newKeyboardState = Keyboard.GetState();
 
             switch (gameState)
@@ -816,7 +818,7 @@ namespace GameOfLife
                         model.Retire(model.ActualPlayer, false);
 
                         //Ha mindenki nyugdíjba ment, kiszámoljuk a gyõztest, és befejezõdik a játék
-                        if (model.IsEveryoneRetired())
+                        if (model.IsEveryoneRetired)
                         {
                             int winner = model.EndGame()[0];
                             output = model.PlayerName(winner) + " nyert!";
@@ -837,7 +839,7 @@ namespace GameOfLife
                         model.Retire(model.ActualPlayer, true);
 
                         //Ha mindenki nyugdíjba ment, kiszámoljuk a gyõztest, és befejezõdik a játék
-                        if (model.IsEveryoneRetired())
+                        if (model.IsEveryoneRetired)
                         {
                             int winner = model.EndGame()[0];
                             output = model.PlayerName(winner) + " nyert!";
@@ -1050,7 +1052,7 @@ namespace GameOfLife
                         (model.PlayerPc(model.ActualPlayer) && computer.blueFieldChangeJob()))
                     {
                         //Fizetünk a tanárnak 20000-et
-                        careerField(20000, 6);
+                        model.PayForSomeone(20000, model.ActualPlayer, 6);
 
                         //Kisorsoljuk a három állást, amelybõl az 1. az eddigi munkája
                         threeCareers = model.GiveThreeCareer();
@@ -1106,37 +1108,37 @@ namespace GameOfLife
                     //"1" lekezelése, ha nem gép köre van, és létezik a kiválasztott játékos, és nem önmagát választotta - az 1. játékost választotta
                     if ((oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1) && !model.PlayerPc(model.ActualPlayer)) &&
                         model.ActualPlayer != 0 && //1. játékos indexe = 0
-                        1 <=model.NumberOfPlayers())
+                        1 <=model.NumberOfPlayers)
                     {
                         arrowPosition = 0;
                     }
                     if ((oldKeyboardState.IsKeyUp(Keys.D2) && newKeyboardState.IsKeyDown(Keys.D2) && !model.PlayerPc(model.ActualPlayer)) &&
                         model.ActualPlayer != 1 &&
-                        2 <= model.NumberOfPlayers())
+                        2 <= model.NumberOfPlayers)
                     {
                         arrowPosition = 1;
                     }
                     if ((oldKeyboardState.IsKeyUp(Keys.D3) && newKeyboardState.IsKeyDown(Keys.D3) && !model.PlayerPc(model.ActualPlayer)) &&
                         model.ActualPlayer != 2 &&
-                        3 <= model.NumberOfPlayers())
+                        3 <= model.NumberOfPlayers)
                     {
                         arrowPosition = 2;
                     }
                     if ((oldKeyboardState.IsKeyUp(Keys.D4) && newKeyboardState.IsKeyDown(Keys.D4) && !model.PlayerPc(model.ActualPlayer)) &&
                         model.ActualPlayer != 3 &&
-                        4 <= model.NumberOfPlayers())
+                        4 <= model.NumberOfPlayers)
                     {
                         arrowPosition = 3;
                     }
                     if ((oldKeyboardState.IsKeyUp(Keys.D5) && newKeyboardState.IsKeyDown(Keys.D5) && !model.PlayerPc(model.ActualPlayer)) &&
                         model.ActualPlayer != 4 &&
-                        5 <= model.NumberOfPlayers())
+                        5 <= model.NumberOfPlayers)
                     {
                         arrowPosition = 4;
                     }
                     if ((oldKeyboardState.IsKeyUp(Keys.D6) && newKeyboardState.IsKeyDown(Keys.D6) && !model.PlayerPc(model.ActualPlayer)) &&
                         model.ActualPlayer != 5 &&
-                        6 <= model.NumberOfPlayers())
+                        6 <= model.NumberOfPlayers)
                     {
                         arrowPosition = 5;
                     }
@@ -1244,17 +1246,6 @@ namespace GameOfLife
 
         }
 
-        //TODO ez a modellbe kell
-        private void careerField(int sum, int careerNum)
-        {
-            model.PayMoney(model.ActualPlayer, sum);
-            int payTo = model.ExistCareer(careerNum);
-            if (payTo != -1)
-            {
-                model.GiveMoney(payTo, sum);
-            }
-        }
-        
         /// <summary>
         /// Kifejti a paraméterben megadott sorszámú mezõ hatását.
         /// <param name="fieldNumber">A megadott mezõ sorszáma, melyre rálépett a játékos.</param>
@@ -1306,7 +1297,7 @@ namespace GameOfLife
                     break;
 
                 case 21:
-                    careerField(5000, 8);
+                    model.PayForSomeone(5000, model.ActualPlayer, 8);
                     break;
 
                 case 27:
@@ -1320,7 +1311,7 @@ namespace GameOfLife
                     break;
 
                 case 30:
-                    careerField(10000, 3);
+                    model.PayForSomeone(10000, model.ActualPlayer, 3);
                     break;
 
                 case 31:
@@ -1331,7 +1322,7 @@ namespace GameOfLife
                     break;
 
                 case 32:
-                    careerField(10000, 4);
+                    model.PayForSomeone(10000, model.ActualPlayer, 4);
                     break;
 
                 case 33:
@@ -1345,7 +1336,7 @@ namespace GameOfLife
                 case 97:
                 case 115:
                 case 128:
-                    careerField(model.PlayerTax(model.ActualPlayer),7);
+                    model.PayForSomeone(model.PlayerTax(model.ActualPlayer), model.ActualPlayer, 7);
                     break;
 
                 case 36:
@@ -1372,7 +1363,7 @@ namespace GameOfLife
 
                 case 42:
                 case 51:
-                    careerField(5000, 3);
+                    model.PayForSomeone(5000, model.ActualPlayer, 3);
                     break;
 
                 case 43:
@@ -1389,11 +1380,11 @@ namespace GameOfLife
                     break; //TODO valszeg nem kell hogy fiú-e vagy lány
 
                 case 47:
-                    careerField(20000, 2);
+                    model.PayForSomeone(20000, model.ActualPlayer, 2);
                     break;
 
                 case 49:
-                    careerField(5000, 0);
+                    model.PayForSomeone(5000, model.ActualPlayer, 0);
                     break;
 
                 case 50:
@@ -1415,7 +1406,7 @@ namespace GameOfLife
                     break;
 
                 case 57:
-                    careerField(5000, 8);
+                    model.PayForSomeone(5000, model.ActualPlayer, 8);
                     break;
 
                 case 58:
@@ -1438,11 +1429,11 @@ namespace GameOfLife
 
                 case 69:
                 case 80:
-                    careerField(25000, 4);
+                    model.PayForSomeone(25000, model.ActualPlayer, 4);
                     break;
 
                 case 72:
-                    careerField(20000, 1);
+                    model.PayForSomeone(20000, model.ActualPlayer, 1);
                     break;
 
                 case 76:
@@ -1458,7 +1449,7 @@ namespace GameOfLife
                     break;
 
                 case 79:
-                    careerField(25000, 2);
+                    model.PayForSomeone(25000, model.ActualPlayer, 2);
                     break;
 
                 case 82:
@@ -1468,7 +1459,7 @@ namespace GameOfLife
 
                 case 84:
                 case 102:
-                    careerField(model.PlayerChildrenNumber(model.ActualPlayer) * 5000, 6);
+                    model.PayForSomeone(model.PlayerChildrenNumber(model.ActualPlayer) * 5000, model.ActualPlayer, 6);
                     break;
 
                 case 85:
@@ -1477,15 +1468,15 @@ namespace GameOfLife
                     break;
 
                 case 87:
-                    careerField(15000, 0);
+                    model.PayForSomeone(15000, model.ActualPlayer, 0);
                     break;
 
                 case 90:
-                    careerField(35000, 1);
+                    model.PayForSomeone(35000, model.ActualPlayer, 1);
                     break;
 
                 case 92:
-                    careerField(25000, 3);
+                    model.PayForSomeone(25000, model.ActualPlayer, 3);
                     break;
 
                 case 93:
@@ -1493,11 +1484,11 @@ namespace GameOfLife
                     break;
 
                 case 94:
-                    careerField(15000, 5);
+                    model.PayForSomeone(15000, model.ActualPlayer, 5);
                     break;
 
                 case 99:
-                    careerField(25000, 1);
+                    model.PayForSomeone(25000, model.ActualPlayer, 1);
                     break;
 
                 case 101:
@@ -1520,7 +1511,7 @@ namespace GameOfLife
                     break;
 
                 case 110:
-                    careerField(30000, 2);
+                    model.PayForSomeone(30000, model.ActualPlayer, 2);
                     break;
 
                 case 112:
@@ -1531,47 +1522,47 @@ namespace GameOfLife
                     break;
 
                 case 114:
-                    careerField(25000, 8);
+                    model.PayForSomeone(25000, model.ActualPlayer, 8);
                     break;
 
                 case 116:
-                    careerField(30000, 3);
+                    model.PayForSomeone(30000, model.ActualPlayer, 3);
                     break;
 
                 case 117:
-                    careerField(35000, 2);
+                    model.PayForSomeone(35000, model.ActualPlayer, 2);
                     break;
 
                 case 121:
-                    careerField(100000, 0);
+                    model.PayForSomeone(100000, model.ActualPlayer, 0);
                     break;
 
                 case 125:
-                    careerField(100000, 8);
+                    model.PayForSomeone(100000, model.ActualPlayer, 8);
                     break;
 
                 case 126:
-                    careerField(model.PlayerChildrenNumber(model.ActualPlayer) * 50000, 6);
+                    model.PayForSomeone(model.PlayerChildrenNumber(model.ActualPlayer) * 50000, model.ActualPlayer, 6);
                     break;
 
                 case 131:
-                    careerField(125000, 1);
+                    model.PayForSomeone(125000, model.ActualPlayer, 1);
                     break;
 
                 case 137:
-                    careerField(65000, 2);
+                    model.PayForSomeone(65000, model.ActualPlayer, 2);
                     break;
 
                 case 143:
-                    careerField(45000, 4);
+                    model.PayForSomeone(45000, model.ActualPlayer, 4);
                     break;
 
                 case 146:
-                    careerField(35000, 0);
+                    model.PayForSomeone(35000, model.ActualPlayer, 0);
                     break;
 
                 case 147:
-                    careerField(55000, 4);
+                    model.PayForSomeone(55000, model.ActualPlayer, 4);
                     break;
 
                 case 148:

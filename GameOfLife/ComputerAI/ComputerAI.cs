@@ -35,12 +35,12 @@ namespace GameOfLife.ComputerAI
             return true; //T.SZ. elég egy bool érték, és mindenhol Trade-ként hívjuk, legyen itt is Trade
         }
 
-        public int /*Keys*/ buyStock()
+        public Int32 /*Keys*/ buyStock()
         {
             return 0; //T.SZ. visszatérési érték: 0-8 között egy szám, hogy melyik részvényt akarja megvenni. Olyat vegyen, ami még nem foglalt! Csak akkor vegyen, ha van pénze!
         }
 
-        public int/*Keys*/ computerTurn()
+        public Int32/*Keys*/ computerTurn()
         {
             /* T.SZ. Visszatérési érték a menüpont sorszáma (0-4 között):
              * 0 - Pörgetés
@@ -60,7 +60,7 @@ namespace GameOfLife.ComputerAI
             return Keys.D1; //T.SZ. visszatérési érték: Keys.D1 vagy Keys.D2
         }
 
-        public /*Keys*/ int selectJob(Int32[] jobs)
+        public /*Keys*/ Int32 selectJob(List<Int32> jobs) //T.SZ. Változott a modell, List<Int32>-t fogok adni int[] helyett
         {
             return 0; //T.SZ. visszatérési érték: 0,1,2. Attól függően, hogy hanyadik munkát akarja
         }
@@ -71,12 +71,12 @@ namespace GameOfLife.ComputerAI
             return Keys.D1; //T.SZ. visszatérési érték: Keys.D1, ha vidéki ház; Keys.D2, ha milliomosok háza
         }
 
-        public /*Keys*/ int selectSalary(Int32[] salaries)
+        public /*Keys*/ Int32 selectSalary(List<Int32> salaries) //T.SZ. Változott a modell, List<Int32>-t fogok adni int[] helyett
         {
             return 0; //T.SZ. visszatérési érték: 0,1,2. Attól függően, hogy hanyadik fizetést akarja
         }
 
-        public int tradeSalary()//Keys switchSalary()
+        public Int32 tradeSalary()//Keys switchSalary()
         {
             return 0; //T.SZ. itt is legyen trade, mert mindenhol Trade-nek hívjuk. Visszatérési érték: a játékos sorszáma, akivel cserélni akar (0-5 között, lásd update függvény, TRADEWITHWHO region)
             //T.SZ. olyan játékost válasszon, aki nem önmaga, és létező játékos, pl. ha ketten játszanak, ne válassza a 3. játékost
