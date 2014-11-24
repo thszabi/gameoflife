@@ -26,7 +26,9 @@ namespace GameOfLife.DataModel
         #region Get Game Data
 
         public Int32 ActualPlayer { get { if (_remainedPlayers.Count > 0) return _actualPlayer; return -1; } set { _actualPlayer = value; } }
-
+        public Int32 NumberOfPlayers {get { return _playerNumber; }}
+        public bool IsEveryoneRetired {get { return _remainedPlayers.Count == 0; }}
+        
         #endregion
 
         #region Get Player Data
@@ -196,11 +198,10 @@ namespace GameOfLife.DataModel
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
             if (_playerList[playerNum].salaryCard == 9)
-                throw new ArgumentException("A játékosnak nincs fizetése"); //T.SZ. return 0 helyett throw
+                throw new ArgumentException("A játékosnak nincs fizetése");
             return _moneyForSalaryCards[_playerList[playerNum].salaryCard];
         }
 
-        //T.SZ. új függvény. Írd újra a nulláról, ha szeretnéd
         /// <summary>
         /// A játékos fizetéséhez tartozó adó értéke
         /// </summary>
@@ -427,7 +428,7 @@ namespace GameOfLife.DataModel
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            _playerList[playerNum].loan += 50000; //T.SZ. nem 40k, hanem 50k, mert 2 kölcsönt kap, azaz 2x25k = 50k
+            _playerList[playerNum].loan += 50000;
         }
 
         /// <summary>
@@ -545,25 +546,7 @@ namespace GameOfLife.DataModel
             Int32 r = rnd.Next(_remainedHouseCards.Count);
             Int32 houseCard = _remainedHouseCards[r];
             _playerList[playerNum].houseCard = houseCard;
-
-            // T.SZ.
-            while (_playerList[playerNum].money < _costForHouseCards[houseCard])
-            {
-                _playerList[playerNum].money += 20000;
-                _playerList[playerNum].loan += 25000;
-            }
-            _playerList[playerNum].money -= _costForHouseCards[houseCard];
-
-            //T.SZ. Sőt, a fenti kódrészlet helyett jobb lenne egy PayMoney(costforhouse)!!
-            
-            /*if (_playerList[playerNum].money < _costForHouseCards[houseCard])
-            {
-                _playerList[playerNum].loan += _costForHouseCards[houseCard] - _playerList[playerNum].money;
-                _playerList[playerNum].money = 0;
-            }
-            else
-                _playerList[playerNum].money -= _costForHouseCards[houseCard];*/
-
+            PayMoney(playerNum, _costForHouseCards[houseCard]);
             _remainedHouseCards.Remove(houseCard);
             return houseCard;
         }
@@ -616,15 +599,15 @@ namespace GameOfLife.DataModel
         /// </summary>
         /// <param name="remainedList"></param>
         /// <returns>A 3 random elem.</returns>
-        private Int32[] GiveThree(List<Int32> remainedList) //T.SZ. gyakran kaptam olyan értékeket, hogy pl. 3 3 2
+        private List<Int32> GiveSome(Int32 some, List<Int32> remainedList)
         {
             List<Int32> temp = new List<int>(remainedList);
-            Int32[] result = new int[3];
+            List<Int32> result = new List<int>();
             Random rnd = new Random();
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < some; i++)
             {
                 Int32 r = rnd.Next(temp.Count);
-                result[i] = remainedList[r]; //T.SZ. ide temp[r] kéne szerintem
+                result.Add(temp[r]); 
                 temp.Remove(result[i]);
             }
             return result;
@@ -634,18 +617,26 @@ namespace GameOfLife.DataModel
         /// Három karrier kártya választása
         /// </summary>
         /// <returns>A három karrier kártya száma</returns>
-        public Int32[] GiveThreeCareer()
+        public List<Int32> GiveThreeCareer(Int32 playernum = -1)
         {
-            return GiveThree(_remainedCareerCards);
+            if (playernum == -1)
+                return GiveSome(3, _remainedCareerCards);
+            List<Int32> threeList = GiveSome(2, _remainedCareerCards);
+            threeList.Add(_playerList[playernum].careerCard);
+            return threeList;
         }
 
         /// <summary>
         /// Három fizetés kártya választása
         /// </summary>
         /// <returns>A három fizetés kártya száma</returns>
-        public Int32[] GiveThreeSalary()
+        public List<Int32> GiveThreeSalary(Int32 playernum = -1)
         {
-            return GiveThree(_remainedSalaryCards);
+            if(playernum == -1)
+                return GiveSome(3, _remainedSalaryCards);
+            List<Int32> threeList = GiveSome(2, _remainedSalaryCards);
+            threeList.Add(_playerList[playernum].salaryCard);
+            return threeList;
         }
 
         /// <summary>
@@ -706,20 +697,52 @@ namespace GameOfLife.DataModel
         /// <returns><c>true</c>, a fizetés sikeres volt. <c>false</c>, ha a játékosnak nem volt elég pénze.</returns>
         public Boolean PayMoney(Int32 playerNum, Int32 sum)
         {
-            //T.SZ. Ezt valahogy úgy kellene megoldani, hogy addig kapja a +20k kölcsönöket, amíg nincs elég pénze, tehát a kölcsönadás automatikusan történjen
-            /* while (player.money < sum)
-             *      player.money += 20k
-             *      player.loan += 25k
-             * player.money -= sum
-             */
-            if (playerNum >= _playerList.Length)
+           if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
             if (sum < 0)
                 throw new ArgumentException("A pénzösszeg rosszul van megadva", "sum");
             if (_playerList[playerNum].money < sum)
                 return false;
+            while (_playerList[playerNum].money < sum)
+            {
+                _playerList[playerNum].money += 20000;
+                _playerList[playerNum].money += 25000;
+            }
             _playerList[playerNum].money -= sum;
             return true;
+        }
+
+        /// <summary>
+        /// Egy játékos fizet, és ha létezik a carrierrel rendelkező játékos, akkor neki.
+        /// </summary>
+        /// <param name="sum">Pénzösszeg</param>
+        /// <param name="payer">Fizető száma</param>
+        /// <param name="careerCard">Karrier száma</param>
+        /// <returns></returns>
+        public Boolean PayForSomeone(Int32 sum, Int32 payer, Int32 careerCard)
+        {
+            while (_playerList[payer].money < sum)
+            {
+                _playerList[payer].money += 20000;
+                _playerList[payer].money += 25000;
+            }
+            Int32 owner = -1;
+            try
+            {
+                owner = ExistCareer(careerCard);
+            }
+            catch (Exception)
+            {
+                owner = -1;
+            }
+            if (owner != -1)
+            {
+                _playerList[owner].money += sum;
+                _playerList[payer].money -= sum;
+                return true;
+            }
+            _playerList[payer].money -= sum;
+            return false;
         }
 
         /// <summary>
@@ -749,8 +772,8 @@ namespace GameOfLife.DataModel
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            if (_playerList[playerNum].careerCard != 9) //T.SZ.
-                _remainedCareerCards.Add(_playerList[playerNum].careerCard); //T.SZ. Azért írtam át, hogy a játékos ki tudja választani a saját kártyáját is (ugyanis ha új munkát választ, akkor a 3 lehetőségből az egyik mindig az eddigi munkája)
+            if (_playerList[playerNum].careerCard != 9) 
+                _remainedCareerCards.Add(_playerList[playerNum].careerCard); 
             if (!_remainedCareerCards.Contains(careerNum))
                 throw new Exception("A karrier kártya már 'foglalt'");
             _playerList[playerNum].careerCard = careerNum;
@@ -768,11 +791,11 @@ namespace GameOfLife.DataModel
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
             if (!_remainedSalaryCards.Contains(salaryNum))
                 throw new Exception("A fizetés kártya már 'foglalt'");
-            _playerList[playerNum].salaryCard = salaryNum; //T.SZ. bug: careerCard helyett salaryCard
+            _playerList[playerNum].salaryCard = salaryNum;
             _remainedSalaryCards.Remove(salaryNum);
         }
 
-        /// <summary>
+        /*/// <summary>
         /// Adófizetés
         /// </summary>
         /// <param name="playerNum">Játékos száma</param>
@@ -787,19 +810,17 @@ namespace GameOfLife.DataModel
                 return false;
             _playerList[playerNum].money -= _taxForSalaryCards[_playerList[playerNum].salaryCard];
             return true;
-        }
+        }*/
 
         /// <summary>
         /// Ikrek születése
         /// </summary>
         /// <param name="playerNum">Játékos száma</param>
         /// <returns>Első értéke azt mutatja, hogy volt-e elég hely az autóban. Második értéke a nemeket tartalmazó tömb: <c>0</c> esetén lány, <c>1</c> esetén fiú.</returns>
-        public Tuple<Boolean, Int32[]> TwoChildren(int playerNum) //T.SZ. Olyan nincs, hogy nincs elég hely a kocsiban
+        public Tuple<Boolean, Int32[]> TwoChildren(int playerNum) 
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            if (_playerList[playerNum].childrenNumber > 4)
-                return new Tuple<bool, int[]>(false, new[] { 0, 0 });
             Int32[] twins = new int[2];
             Random rnd = new Random();
             for (int i = 0; i < 2; i++)
@@ -840,35 +861,25 @@ namespace GameOfLife.DataModel
             Boolean police = false;
             if (steps == 10)
             {
-                if (!_remainedCareerCards.Contains(5)) //T.SZ. ehelyett az if helyett ExistCareer-t nem lehetne használni?
+                try
                 {
-                    Int32 temp = 0;
-                    foreach (Player player in _playerList)
-                    {
-                        if (player.careerCard == 5)
-                        {
-                            owner = temp;
-                            police = true;
-                        }
-                        ++temp;
-                    }
-                    if (owner == -1)
-                        throw new Exception("A rendőr nem található");
+                    owner = ExistCareer(5);
+                    police = true;
+                }
+                catch (Exception)
+                {
+                    owner = -1;
                 }
             }
             else
             {
-                if (!_remainedStockCards.Contains(steps - 1))
+                try
                 {
-                    Int32 temp = 0;
-                    foreach (Player player in _playerList)
-                    {
-                        if (player.stockCard == (steps - 1)) //T.SZ. player.careerCard -> player.stockCard
-                            owner = temp;
-                        ++temp;
-                    }
-                    if (owner == -1)
-                        throw new Exception("A részvénytulajdonos nem található"); //T.SZ. "A karrier nem található" -> "A részvénytulajdonos nem található"
+                    owner = ExistCareer(steps - 1);
+                }
+                catch (Exception)
+                {
+                    owner = -1;
                 }
             }
             if (owner != -1)
@@ -936,8 +947,7 @@ namespace GameOfLife.DataModel
             Int32 temp = 0;
             Int32 maxMoney;
             List<Int32> maxPlayer = new List<int>();
-            //while (_playerList[temp].retired != 2 && temp < _playerNumber) //T.SZ. eredeti
-            while (temp < _playerNumber && _playerList[temp].retired != 2)   //T.SZ. új
+            while (temp < _playerNumber && _playerList[temp].retired != 2)
             {
                 ++temp;
             }
@@ -1004,18 +1014,6 @@ namespace GameOfLife.DataModel
             return winners;
         }
 
-        //T.SZ. újraírhatod a nulláról, ha gondolod
-        public Int32 NumberOfPlayers()
-        {
-            return _playerNumber;
-        }
-
-        //T.SZ. újraírhatod a nulláról, ha gondolod
-        public bool IsEveryoneRetired()
-        {
-            return _remainedPlayers.Count == 0;
-        }
-        
         #endregion
 
         #region Constructors
