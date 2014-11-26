@@ -157,7 +157,7 @@ namespace GameOfLife
         private Texture2D career6;
         private Texture2D career7;
         private Texture2D career8;
-        private Texture2D career9;
+        private Texture2D career0;
 
         Texture2D[] houses = new Texture2D[9];
         private Texture2D house1;
@@ -303,6 +303,7 @@ namespace GameOfLife
             stockes[7] = stock8;
             stockes[8] = stock9;
 
+            career0 = Content.Load<Texture2D>("career0");
             career1 = Content.Load<Texture2D>("career1");
             career2 = Content.Load<Texture2D>("career2");
             career3 = Content.Load<Texture2D>("career3");
@@ -310,17 +311,16 @@ namespace GameOfLife
             career5 = Content.Load<Texture2D>("career5");
             career6 = Content.Load<Texture2D>("career6");
             career7 = Content.Load<Texture2D>("career7");
-            career8 = Content.Load<Texture2D>("career8");
-            career9 = Content.Load<Texture2D>("career9");
-            careers[0] = career1;
-            careers[1] = career2;
-            careers[2] = career3;
-            careers[3] = career4;
-            careers[4] = career5;
-            careers[5] = career6;
-            careers[6] = career7;
-            careers[7] = career8;
-            careers[8] = career9;
+            career8 = Content.Load<Texture2D>("career8");            
+            careers[0] = career0;
+            careers[1] = career1;
+            careers[2] = career2;
+            careers[3] = career3;
+            careers[4] = career4;
+            careers[5] = career5;
+            careers[6] = career6;
+            careers[7] = career7;
+            careers[8] = career8;
 
             salary1 = Content.Load<Texture2D>("salary1");
             salary2 = Content.Load<Texture2D>("salary2");

@@ -256,11 +256,6 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-    <Compile Include="career9.png">
-      <Name>career9</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
     <Compile Include="car_ins.jpg">
       <Name>car_ins</Name>
       <Importer>TextureImporter</Importer>
@@ -418,6 +413,13 @@
     </Compile>
     <Compile Include="stock_9.png">
       <Name>stock_9</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="career0.png">
+      <Name>career0</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
