@@ -26,9 +26,9 @@ namespace GameOfLife.DataModel
         #region Get Game Data
 
         public Int32 ActualPlayer { get { if (_remainedPlayers.Count > 0) return _actualPlayer; return -1; } set { _actualPlayer = value; } }
-        public Int32 NumberOfPlayers {get { return _playerNumber; }}
-        public bool IsEveryoneRetired {get { return _remainedPlayers.Count == 0; }}
-        
+        public Int32 NumberOfPlayers { get { return _playerNumber; } }
+        public Boolean IsEveryoneRetired { get { return _remainedPlayers.Count == 0; } }
+
         #endregion
 
         #region Get Player Data
@@ -214,7 +214,7 @@ namespace GameOfLife.DataModel
                 throw new ArgumentException("A játékosnak nincs fizetése");
             return _taxForSalaryCards[_playerList[playerNum].salaryCard];
         }
-        
+
         /// <summary>
         /// Játékos részvényének száma
         /// </summary>
@@ -353,7 +353,7 @@ namespace GameOfLife.DataModel
         /// </summary>
         /// <param name="careerNum">Karrier kártya száma</param>
         /// <returns><c>-1</c>, ha nem birtokolja senki az állást. Míg ha valaki birtokolja, visszaadja a játékos számát.</returns>
-        public Int32 ExistCareer(int careerNum)
+        public Int32 ExistCareer(Int32 careerNum)
         {
             if (careerNum > 8 || careerNum < 0)
                 throw new ArgumentException("A megadott munka nem létezik!", "careerNum");
@@ -367,6 +367,16 @@ namespace GameOfLife.DataModel
                 ++temp;
             }
             throw new Exception("Hiba történt a karrier keresése közben!");
+        }
+
+        /// <summary>
+        /// Megadja a fizetés összegét egy adott fizetés kártyához
+        /// </summary>
+        /// <param name="cardnum">Fizetés kárty száma</param>
+        /// <returns>Fizetés</returns>
+        public Int32 GetMoneyForSalaryCard(Int32 cardnum)
+        {
+            return _moneyForSalaryCards[cardnum];
         }
 
         /// <summary>
@@ -607,7 +617,7 @@ namespace GameOfLife.DataModel
             for (int i = 0; i < some; i++)
             {
                 Int32 r = rnd.Next(temp.Count);
-                result.Add(temp[r]); 
+                result.Add(temp[r]);
                 temp.Remove(result[i]);
             }
             return result;
@@ -632,7 +642,7 @@ namespace GameOfLife.DataModel
         /// <returns>A három fizetés kártya száma</returns>
         public List<Int32> GiveThreeSalary(Int32 playernum = -1)
         {
-            if(playernum == -1)
+            if (playernum == -1)
                 return GiveSome(3, _remainedSalaryCards);
             List<Int32> threeList = GiveSome(2, _remainedSalaryCards);
             threeList.Add(_playerList[playernum].salaryCard);
@@ -697,7 +707,7 @@ namespace GameOfLife.DataModel
         /// <returns><c>true</c>, a fizetés sikeres volt. <c>false</c>, ha a játékosnak nem volt elég pénze.</returns>
         public Boolean PayMoney(Int32 playerNum, Int32 sum)
         {
-           if (playerNum >= _playerList.Length)
+            if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
             if (sum < 0)
                 throw new ArgumentException("A pénzösszeg rosszul van megadva", "sum");
@@ -772,8 +782,8 @@ namespace GameOfLife.DataModel
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            if (_playerList[playerNum].careerCard != 9) 
-                _remainedCareerCards.Add(_playerList[playerNum].careerCard); 
+            if (_playerList[playerNum].careerCard != 9)
+                _remainedCareerCards.Add(_playerList[playerNum].careerCard);
             if (!_remainedCareerCards.Contains(careerNum))
                 throw new Exception("A karrier kártya már 'foglalt'");
             _playerList[playerNum].careerCard = careerNum;
@@ -795,29 +805,12 @@ namespace GameOfLife.DataModel
             _remainedSalaryCards.Remove(salaryNum);
         }
 
-        /*/// <summary>
-        /// Adófizetés
-        /// </summary>
-        /// <param name="playerNum">Játékos száma</param>
-        /// <returns><c>true</c>, ha sikeres volt az adófizetés. <c>false</c>, ha a játékosnak nem volt elég pénze az adóra.</returns>
-        public Boolean PayTax(Int32 playerNum) //T.SZ. Nem kell!
-        {
-            if (playerNum >= _playerList.Length)
-                throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            if (_playerList[playerNum].salaryCard == 9)
-                throw new Exception("A játékosnak még nincs fizetése.");
-            if (_playerList[playerNum].money < _taxForSalaryCards[_playerList[playerNum].salaryCard])
-                return false;
-            _playerList[playerNum].money -= _taxForSalaryCards[_playerList[playerNum].salaryCard];
-            return true;
-        }*/
-
         /// <summary>
         /// Ikrek születése
         /// </summary>
         /// <param name="playerNum">Játékos száma</param>
         /// <returns>Első értéke azt mutatja, hogy volt-e elég hely az autóban. Második értéke a nemeket tartalmazó tömb: <c>0</c> esetén lány, <c>1</c> esetén fiú.</returns>
-        public Tuple<Boolean, Int32[]> TwoChildren(int playerNum) 
+        public Tuple<Boolean, Int32[]> TwoChildren(int playerNum)
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
@@ -856,7 +849,7 @@ namespace GameOfLife.DataModel
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
             Random rnd = new Random();
-            Int32 steps = rnd.Next(1, 10);
+            Int32 steps = rnd.Next(1, 11);
             Int32 owner = -1;
             Boolean police = false;
             if (steps == 10)
