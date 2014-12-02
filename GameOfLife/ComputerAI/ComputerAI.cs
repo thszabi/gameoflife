@@ -66,7 +66,23 @@ namespace GameOfLife.ComputerAI
 
         public bool blueFieldTradeSalary()
         {
-            return true; //T.SZ. elég egy bool érték, és mindenhol Trade-ként hívjuk, legyen itt is Trade
+            Int32 mySalary = model.PlayerSalary(model.ActualPlayer);
+            Int32 maxSalary = mySalary;
+            for (int i = 0; i < model.NumberOfPlayers; ++i )
+            {
+                if(model.PlayerSalary(i)>=maxSalary)
+                {
+                    maxSalary = model.PlayerSalary(i);
+                }
+            }
+            if(maxSalary!=mySalary)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public Int32 buyStock()
@@ -89,13 +105,29 @@ namespace GameOfLife.ComputerAI
 
         public Int32 selectSalary(List<Int32> salaries)
         {
-            return 0; //T.SZ. visszatérési érték: 0,1,2. Attól függően, hogy hanyadik fizetést akarja
+            int max = 0;
+            for (int i = 1; i < salaries.Count; i++)
+            {
+                if(salaries[i]>salaries[max])
+                {
+                    max = i;
+                }
+            }
+            Console.WriteLine(max);
+            return max; //T.SZ. visszatérési érték: 0,1,2. Attól függően, hogy hanyadik fizetést akarja
         }
 
         public Int32 tradeSalary()
         {
-            return 0; //T.SZ. itt is legyen trade, mert mindenhol Trade-nek hívjuk. Visszatérési érték: a játékos sorszáma, akivel cserélni akar (0-5 között, lásd update függvény, TRADEWITHWHO region)
-            //T.SZ. olyan játékost válasszon, aki nem önmaga, és létező játékos, pl. ha ketten játszanak, ne válassza a 3. játékost
+            Int32 maxSalary = model.ActualPlayer;
+            for (int i = 0; i < model.NumberOfPlayers; ++i)
+            {
+                if (model.PlayerSalary(i) > model.PlayerSalary(maxSalary))
+                {
+                    maxSalary = i;
+                }
+            }
+            return maxSalary;
         }
 
         public Keys selectRetire()
