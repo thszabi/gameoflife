@@ -71,12 +71,20 @@ namespace GameOfLife.ComputerAI
 
         public Int32 buyStock()
         {
-            return 0; //T.SZ. visszatérési érték: 0-8 között egy szám, hogy melyik részvényt akarja megvenni. Olyat vegyen, ami még nem foglalt! Csak akkor vegyen, ha van pénze!
+            Random rnd = new Random();
+            Int32 decision = rnd.Next(0, 9);
+            while(model.GetStockCardAvailability(decision)!=true)
+            {
+                decision = (decision + 1) % 9;
+            }
+            return decision;
         }
 
         public Int32 selectJob(List<Int32> jobs)
         {
-            return 0; //T.SZ. visszatérési érték: 0,1,2. Attól függően, hogy hanyadik munkát akarja
+            Random rnd = new Random();
+            Int32 decision = rnd.Next(0, 3);
+            return decision; //T.SZ. visszatérési érték: 0,1,2. Attól függően, hogy hanyadik munkát akarja
         }
 
         public Int32 selectSalary(List<Int32> salaries)
