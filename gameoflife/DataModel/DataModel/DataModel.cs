@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 
-namespace DataModel
+namespace GameOfLife.DataModel
 {
+    [Serializable]
     public class DataModel
     {
-        private readonly Int32[] _costForHouseCards = {40000, 60000, 80000, 100000, 120000, 140000, 160000, 180000,200000};
-        private readonly Int32[] _insuranceForHouseCards = {10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000};
+        private readonly Int32[] _costForHouseCards = { 40000, 60000, 80000, 100000, 120000, 140000, 160000, 180000, 200000 };
+        private readonly Int32[] _insuranceForHouseCards = { 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000 };
         private Player[] _playerList;
         private Int32 _playerNumber;
         private List<Int32> _remainedCareerCards;
@@ -20,14 +20,15 @@ namespace DataModel
         private List<Int32> _remainedPlayers;
         private Int32 _actualPlayer;
         private List<Int32> _rewardForLifeCards;
-        private readonly Int32[] _moneyForSalaryCards = {20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000};
-        private readonly Int32[] _taxForSalaryCards = {5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000};
-        
+        private readonly Int32[] _moneyForSalaryCards = { 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000 };
+        private readonly Int32[] _taxForSalaryCards = { 5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000 };
+
         #region Get Game Data
 
-        public List<Int32> RemainedStockCards {get { return _remainedStockCards; }}
-        public Int32 ActualPlayer {get {if(_remainedPlayers.Count>0) return _actualPlayer; return -1;}}
-
+        public Int32 ActualPlayer { get { if (_remainedPlayers.Count > 0) return _actualPlayer; return -1; } set { _actualPlayer = value; } }
+        public Int32 NumberOfPlayers {get { return _playerNumber; }}
+        public Boolean IsEveryoneRetired {get { return _remainedPlayers.Count == 0; }}
+        
         #endregion
 
         #region Get Player Data
@@ -42,7 +43,7 @@ namespace DataModel
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
             return _playerList[playerNum].careerCard;
         }
-        
+
         /// <summary>
         /// Játékos rendelkezik-e gépjármű biztosítással.
         /// </summary>
@@ -85,6 +86,17 @@ namespace DataModel
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
             return _playerList[playerNum].gender;
+        }
+
+        /// <summary>
+        /// Játékos diplomás-e
+        /// </summary>
+        /// <param name="playerNum">Játékos száma</param>
+        public Boolean PlayerDegree(Int32 playerNum)
+        {
+            if (playerNum >= _playerList.Length)
+                throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
+            return _playerList[playerNum].deg;
         }
 
         /// <summary>
@@ -185,9 +197,24 @@ namespace DataModel
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
+            if (_playerList[playerNum].salaryCard == 9)
+                throw new ArgumentException("A játékosnak nincs fizetése");
             return _moneyForSalaryCards[_playerList[playerNum].salaryCard];
         }
 
+        /// <summary>
+        /// A játékos fizetéséhez tartozó adó értéke
+        /// </summary>
+        /// <param name="playerNum">Játékos száma</param>
+        public Int32 PlayerTax(Int32 playerNum)
+        {
+            if (playerNum >= _playerList.Length)
+                throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
+            if (_playerList[playerNum].salaryCard == 9)
+                throw new ArgumentException("A játékosnak nincs fizetése");
+            return _taxForSalaryCards[_playerList[playerNum].salaryCard];
+        }
+        
         /// <summary>
         /// Játékos részvényének száma
         /// </summary>
@@ -197,6 +224,13 @@ namespace DataModel
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
             return _playerList[playerNum].stockCard;
+        }
+
+        public Boolean GetStockCardAvailability(Int32 stockcard)
+        {
+            if (stockcard >= 9)
+                throw new ArgumentException("A részvény száma hibás", "stockcard");
+            return _remainedStockCards.Contains(stockcard);
         }
 
         /// <summary>
@@ -218,12 +252,19 @@ namespace DataModel
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            if (_playerList[playerNum].loseNextRound)
-            {
-                _playerList[playerNum].loseNextRound = false;
-                return true;
-            }
-            return false;
+            return _playerList[playerNum].loseNextRound;
+        }
+
+        /// <summary>
+        /// Nyugdíjas-e
+        /// </summary>
+        /// <param name="playerNum">Játékos száma</param>
+        /// <returns><c>true</c> A játékos nyugdíjas. <c>false</c> A járékos még nem ment nyugdíjba.</returns>
+        public bool IsRetired(Int32 playerNum)
+        {
+            if (playerNum >= _playerList.Length)
+                throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
+            return (_playerList[playerNum].retired != 0);
         }
 
         #endregion
@@ -273,17 +314,20 @@ namespace DataModel
         /// </summary>
         /// <param name="playerNum">Játékos száma</param>
         /// <param name="stockNum">Részvény száma</param>
-        public void BuyStock(Int32 playerNum, Int32 stockNum)
+        public Boolean BuyStock(Int32 playerNum, Int32 stockNum)
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
             if (!_remainedStockCards.Contains(stockNum))
                 throw new ArgumentException("A megadott részvényt már birtokolja valaki, vagy nem megfelelő a részvény száma!", "stockNum");
-            if (_playerList[playerNum].stockCard == 9)
+            if (_playerList[playerNum].stockCard != 9)
                 throw new ArgumentException("A megadott játékos már rendelkezik részvénnyel!", "stockNum");
+            if (_playerList[playerNum].money < 50000)
+                return false;
             _playerList[playerNum].stockCard = stockNum;
             _remainedStockCards.Remove(stockNum);
             _playerList[playerNum].money -= 50000;
+            return true;
         }
 
         /// <summary>
@@ -291,7 +335,7 @@ namespace DataModel
         /// </summary>
         /// <param name="playerNum1">Egyik játékos száma</param>
         /// <param name="playerNum2">Másik játékos száma</param>
-        public void ChangeSalary(Int32 playerNum1, Int32 playerNum2)
+        public void TradeSalary(Int32 playerNum1, Int32 playerNum2)
         {
             if (playerNum1 >= _playerList.Length)
                 throw new ArgumentException("Az első játékos száma nagyobb, mint a játékosok száma", "playerNum1");
@@ -309,7 +353,7 @@ namespace DataModel
         /// </summary>
         /// <param name="careerNum">Karrier kártya száma</param>
         /// <returns><c>-1</c>, ha nem birtokolja senki az állást. Míg ha valaki birtokolja, visszaadja a játékos számát.</returns>
-        public Int32 ExistCareer(int careerNum)
+        public Int32 ExistCareer(Int32 careerNum)
         {
             if (careerNum > 8 || careerNum < 0)
                 throw new ArgumentException("A megadott munka nem létezik!", "careerNum");
@@ -323,6 +367,16 @@ namespace DataModel
                 ++temp;
             }
             throw new Exception("Hiba történt a karrier keresése közben!");
+        }
+
+        /// <summary>
+        /// Megadja a fizetés összegét egy adott fizetés kártyához
+        /// </summary>
+        /// <param name="cardnum">Fizetés kárty száma</param>
+        /// <returns>Fizetés</returns>
+        public Int32 GetMoneyForSalaryCar(Int32 cardnum)
+        {
+            return _moneyForSalaryCards[cardnum];
         }
 
         /// <summary>
@@ -342,7 +396,7 @@ namespace DataModel
             Random rnd = new Random();
             Int32 r = rnd.Next(_remainedStockCards.Count);
             Int32 stockNum = _remainedStockCards[r];
-            _playerList[playerNum].money += 10000;
+            _playerList[playerNum].money += 50000;
             BuyStock(playerNum, stockNum);
             return 0;
         }
@@ -372,20 +426,31 @@ namespace DataModel
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            _playerList[_playerNumber].money += loan;
+            _playerList[playerNum].money += loan;
             _playerList[playerNum].loan += loan;
+        }
+
+        /// <summary>
+        /// Diákhitel
+        /// </summary>
+        /// <param name="playerNum">Játékos neve</param>
+        public void GetStudentLoan(Int32 playerNum)
+        {
+            if (playerNum >= _playerList.Length)
+                throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
+            _playerList[playerNum].loan += 50000;
         }
 
         /// <summary>
         /// Játékos házasságkötése
         /// </summary>
         /// <param name="playerNum">Játékos száma</param>
-        public void GetMarried(Int32 playerNum)
+        public void Marry(Int32 playerNum)
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            if(_playerList[playerNum].married)
-                throw new ArgumentException("A játékos már házas","playerNum");
+            if (_playerList[playerNum].married)
+                throw new ArgumentException("A játékos már házas", "playerNum");
             _playerList[playerNum].married = true;
         }
 
@@ -398,7 +463,7 @@ namespace DataModel
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            if(sum < 0)
+            if (sum < 0)
                 throw new ArgumentException("A megadott összeg hibás", "sum");
             _playerList[playerNum].money += sum;
         }
@@ -422,22 +487,21 @@ namespace DataModel
                     max = player.location;
                     maxPlayer = temp;
                 }
-                ++ temp;
+                ++temp;
             }
-            if (maxPlayer == playerNum)
-                return true;
-            return false;
+            return (maxPlayer == playerNum);
         }
 
         /// <summary>
         /// A játékos kimarad a következő körből
         /// </summary>
         /// <param name="playerNum">Játékos száma</param>
-        public void LoseNextRound(Int32 playerNum)
+        /// <param name="value">Az loseNextRound értéke (igaz, vagy hamis).</param>
+        public void SetLoseNextRound(Int32 playerNum, Boolean value)
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            _playerList[playerNum].loseNextRound = true;
+            _playerList[playerNum].loseNextRound = value;
         }
 
         /// <summary>
@@ -461,16 +525,16 @@ namespace DataModel
         /// </summary>
         /// <param name="playerNum">Játékos száma</param>
         /// <returns>A húzott karrier kártya száma.</returns>
-        public Int32 NeedCareer(Int32 playerNum)
+        public Int32 GiveCareer(Int32 playerNum)
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            if(_remainedCareerCards.Count == 0)
+            if (_remainedCareerCards.Count == 0)
                 throw new Exception("Nincs több karrier kártya");
             Random rnd = new Random();
             Int32 r = rnd.Next(_remainedCareerCards.Count);
             Int32 careerCard = _remainedCareerCards[r];
-            if(_playerList[playerNum].careerCard != 9)
+            if (_playerList[playerNum].careerCard != 9)
                 _remainedCareerCards.Add(_playerList[playerNum].careerCard);
             _playerList[playerNum].careerCard = careerCard;
             _remainedCareerCards.Remove(careerCard);
@@ -482,7 +546,7 @@ namespace DataModel
         /// </summary>
         /// <param name="playerNum">Játékos száma</param>
         /// <returns>A húzott birtoklevél száma.</returns>
-        public Int32 NeedHouse(Int32 playerNum)
+        public Int32 GiveHouse(Int32 playerNum)
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
@@ -491,13 +555,8 @@ namespace DataModel
             Random rnd = new Random();
             Int32 r = rnd.Next(_remainedHouseCards.Count);
             Int32 houseCard = _remainedHouseCards[r];
-            while (_costForHouseCards[houseCard]>_playerList[playerNum].money)
-            {
-                r = rnd.Next(_remainedHouseCards.Count);
-                houseCard = _remainedHouseCards[r];
-            }
             _playerList[playerNum].houseCard = houseCard;
-            _playerList[playerNum].money -= _costForHouseCards[houseCard];
+            PayMoney(playerNum, _costForHouseCards[houseCard]);
             _remainedHouseCards.Remove(houseCard);
             return houseCard;
         }
@@ -507,11 +566,11 @@ namespace DataModel
         /// </summary>
         /// <param name="playerNum">Játékos száma</param>
         /// <returns>Játékos száma, akitől az életzsetont elvettük.</returns>
-        public Int32 NeedLifeCard(Int32 playerNum)
+        public Int32 StealLifeCard(Int32 playerNum)
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            if(_remainedLifeCards != 0)
+            if (_remainedLifeCards != 0)
                 throw new Exception("Még van élet kártya a pakliban");
             Random rnd = new Random();
             Int32 r = rnd.Next(_remainedPlayers.Count);
@@ -522,7 +581,7 @@ namespace DataModel
                 otherPlayer = _remainedPlayers[r];
             }
             --_playerList[otherPlayer].lifeCardNumber;
-            ++ _playerList[playerNum].lifeCardNumber;
+            ++_playerList[playerNum].lifeCardNumber;
             return otherPlayer;
         }
 
@@ -530,8 +589,8 @@ namespace DataModel
         /// A játékos egy fizetés kártyát húz
         /// </summary>
         /// <param name="playerNum">Játékos száma</param>
-        /// <returns>A húzott fizetés kártya száma.</returns>
-        public Int32 NeedSalary(Int32 playerNum)
+        /// <returns>A húzott fizetés kártyához tartozó fizetés összege.</returns>
+        public Int32 GiveSalary(Int32 playerNum)
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
@@ -542,7 +601,7 @@ namespace DataModel
             Int32 salaryCard = _remainedSalaryCards[r];
             _playerList[playerNum].salaryCard = salaryCard;
             _remainedSalaryCards.Remove(salaryCard);
-            return salaryCard;
+            return _moneyForSalaryCards[salaryCard];
         }
 
         /// <summary>
@@ -550,15 +609,15 @@ namespace DataModel
         /// </summary>
         /// <param name="remainedList"></param>
         /// <returns>A 3 random elem.</returns>
-        private Int32[] NeedThree(List<Int32> remainedList)
+        private List<Int32> GiveSome(Int32 some, List<Int32> remainedList)
         {
             List<Int32> temp = new List<int>(remainedList);
-            Int32[] result = new int[3];
+            List<Int32> result = new List<int>();
             Random rnd = new Random();
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < some; i++)
             {
                 Int32 r = rnd.Next(temp.Count);
-                result[i] = _remainedSalaryCards[r];
+                result.Add(temp[r]); 
                 temp.Remove(result[i]);
             }
             return result;
@@ -568,18 +627,26 @@ namespace DataModel
         /// Három karrier kártya választása
         /// </summary>
         /// <returns>A három karrier kártya száma</returns>
-        public Int32[] NeedThreeCareer()
+        public List<Int32> GiveThreeCareer(Int32 playernum = -1)
         {
-            return NeedThree(_remainedCareerCards);
+            if (playernum == -1)
+                return GiveSome(3, _remainedCareerCards);
+            List<Int32> threeList = GiveSome(2, _remainedCareerCards);
+            threeList.Add(_playerList[playernum].careerCard);
+            return threeList;
         }
 
         /// <summary>
         /// Három fizetés kártya választása
         /// </summary>
         /// <returns>A három fizetés kártya száma</returns>
-        public Int32[] NeedThreeSalary()
+        public List<Int32> GiveThreeSalary(Int32 playernum = -1)
         {
-            return NeedThree(_remainedSalaryCards);
+            if(playernum == -1)
+                return GiveSome(3, _remainedSalaryCards);
+            List<Int32> threeList = GiveSome(2, _remainedSalaryCards);
+            threeList.Add(_playerList[playernum].salaryCard);
+            return threeList;
         }
 
         /// <summary>
@@ -595,10 +662,10 @@ namespace DataModel
             if (_playerList[playerNum].childrenNumber > 5)
                 return false;
             if (isGirl)
-                _playerList[playerNum].children[_playerList[playerNum].childrenNumber] = 0;
+                _playerList[playerNum].children.Add(0);
             else
-                _playerList[playerNum].children[_playerList[playerNum].childrenNumber] = 1;
-            ++ _playerList[playerNum].childrenNumber;
+                _playerList[playerNum].children.Add(1);
+            ++_playerList[playerNum].childrenNumber;
             return true;
         }
 
@@ -606,17 +673,18 @@ namespace DataModel
         /// Kölcsön visszafizetése
         /// </summary>
         /// <param name="playerNum">Játékos száma</param>
+        /// <param name="sum">Az összeg amennyit vissza szeretne fizetni.</param>
         /// <returns><c>true</c>, ha a kölcsönt sikeresen visszafizette. <c>false</c>, ha a játékosnak nincs elég pénze a visszafizetéshez.</returns>
-        public Boolean PayBackLoan(Int32 playerNum)
+        public Boolean PayBackLoan(Int32 playerNum, Int32 sum)
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            if (_playerList[playerNum].loan == 0)
-                throw new Exception("A játékosnak nincsen kölcsöne.");
-            if (_playerList[playerNum].loan > _playerList[playerNum].money)
+            if (_playerList[playerNum].loan < sum)
+                throw new Exception("A játékosnak nincsen ennyi kölcsöne.");
+            if (sum > _playerList[playerNum].money)
                 return false;
-            _playerList[playerNum].money -= _playerList[playerNum].loan;
-            _playerList[playerNum].loan = 0;
+            _playerList[playerNum].money -= sum;
+            _playerList[playerNum].loan -= sum;
             return true;
         }
 
@@ -639,14 +707,52 @@ namespace DataModel
         /// <returns><c>true</c>, a fizetés sikeres volt. <c>false</c>, ha a játékosnak nem volt elég pénze.</returns>
         public Boolean PayMoney(Int32 playerNum, Int32 sum)
         {
-            if (playerNum >= _playerList.Length)
+           if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            if(sum<0)
-                throw new ArgumentException("A pénzösszeg rosszul van megadva","sum");
+            if (sum < 0)
+                throw new ArgumentException("A pénzösszeg rosszul van megadva", "sum");
             if (_playerList[playerNum].money < sum)
                 return false;
+            while (_playerList[playerNum].money < sum)
+            {
+                _playerList[playerNum].money += 20000;
+                _playerList[playerNum].money += 25000;
+            }
             _playerList[playerNum].money -= sum;
             return true;
+        }
+
+        /// <summary>
+        /// Egy játékos fizet, és ha létezik a carrierrel rendelkező játékos, akkor neki.
+        /// </summary>
+        /// <param name="sum">Pénzösszeg</param>
+        /// <param name="payer">Fizető száma</param>
+        /// <param name="careerCard">Karrier száma</param>
+        /// <returns></returns>
+        public Boolean PayForSomeone(Int32 sum, Int32 payer, Int32 careerCard)
+        {
+            while (_playerList[payer].money < sum)
+            {
+                _playerList[payer].money += 20000;
+                _playerList[payer].money += 25000;
+            }
+            Int32 owner = -1;
+            try
+            {
+                owner = ExistCareer(careerCard);
+            }
+            catch (Exception)
+            {
+                owner = -1;
+            }
+            if (owner != -1)
+            {
+                _playerList[owner].money += sum;
+                _playerList[payer].money -= sum;
+                return true;
+            }
+            _playerList[payer].money -= sum;
+            return false;
         }
 
         /// <summary>
@@ -672,10 +778,12 @@ namespace DataModel
         /// </summary>
         /// <param name="playerNum">Játékos száma</param>
         /// <param name="careerNum">Karrier kártya száma</param>
-        public void SelectedCareer(Int32 playerNum, Int32 careerNum)
+        public void SetCareer(Int32 playerNum, Int32 careerNum)
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
+            if (_playerList[playerNum].careerCard != 9) 
+                _remainedCareerCards.Add(_playerList[playerNum].careerCard); 
             if (!_remainedCareerCards.Contains(careerNum))
                 throw new Exception("A karrier kártya már 'foglalt'");
             _playerList[playerNum].careerCard = careerNum;
@@ -687,31 +795,14 @@ namespace DataModel
         /// </summary>
         /// <param name="playerNum">Játékos száma</param>
         /// <param name="salaryNum">Fizetés kártya száma</param>
-        public void SelectedSalary(Int32 playerNum, Int32 salaryNum)
+        public void SetSalary(Int32 playerNum, Int32 salaryNum)
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
             if (!_remainedSalaryCards.Contains(salaryNum))
-                throw new Exception("A karrier kártya már 'foglalt'");
-            _playerList[playerNum].careerCard = salaryNum;
+                throw new Exception("A fizetés kártya már 'foglalt'");
+            _playerList[playerNum].salaryCard = salaryNum;
             _remainedSalaryCards.Remove(salaryNum);
-        }
-
-        /// <summary>
-        /// Adófizetés
-        /// </summary>
-        /// <param name="playerNum">Játékos száma</param>
-        /// <returns><c>true</c>, ha sikeres volt az adófizetés. <c>false</c>, ha a játékosnak nem volt elég pénze az adóra.</returns>
-        public Boolean PayTax(Int32 playerNum)
-        {
-            if (playerNum >= _playerList.Length)
-                throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            if(_playerList[playerNum].salaryCard == 9)
-                throw new Exception("A játékosnak még nincs fizetése.");
-            if (_playerList[playerNum].money < _taxForSalaryCards[_playerList[playerNum].salaryCard])
-                return false;
-            _playerList[playerNum].money -= _taxForSalaryCards[_playerList[playerNum].salaryCard];
-            return true;
         }
 
         /// <summary>
@@ -719,73 +810,71 @@ namespace DataModel
         /// </summary>
         /// <param name="playerNum">Játékos száma</param>
         /// <returns>Első értéke azt mutatja, hogy volt-e elég hely az autóban. Második értéke a nemeket tartalmazó tömb: <c>0</c> esetén lány, <c>1</c> esetén fiú.</returns>
-        public Tuple<Boolean, Int32[]> TwoChildren(int playerNum)
+        public Tuple<Boolean, Int32[]> TwoChildren(int playerNum) 
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            if(_playerList[playerNum].childrenNumber > 4)
-                return new Tuple<bool, int[]>(false, new[]{0,0});
             Int32[] twins = new int[2];
             Random rnd = new Random();
             for (int i = 0; i < 2; i++)
             {
-                Int32 r = rnd.Next(0,1);
+                Int32 r = rnd.Next(0, 1);
                 twins[i] = r;
+                ++_playerList[playerNum].childrenNumber;
+                _playerList[playerNum].children.Add(r);
             }
             return new Tuple<bool, int[]>(true, twins);
         }
 
-        
+        /// <summary>
+        /// A játékos megszerzi a diplomát.
+        /// </summary>
+        /// <param name="playerNum">Játékos száma</param>
+        public void TakeDegree(int playerNum)
+        {
+            if (playerNum >= _playerList.Length)
+                throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
+            if (_playerList[playerNum].deg)
+                throw new Exception("A játékos már egyszer ledipomázott.");
+            _playerList[playerNum].deg = true;
+        }
+
         /// <summary>
         /// Pörgetés
         /// </summary>
         /// <param name="playerNum">Játékos száma</param>
-        /// <returns>Első érték a pörgetett szám. Második érték a játékos száma, aki a megfelelő részvényt birtokolja</returns>
+        /// <returns>Null-lal tér vissza, ha a játékos kimarad a körből. Egyébként: Első érték a pörgetett szám. Második érték a játékos száma, aki a megfelelő részvényt birtokolja</returns>
         public Tuple<Int32, Int32> Spin(int playerNum)
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
             Random rnd = new Random();
-            Int32 steps = rnd.Next(1, 10);
+            Int32 steps = rnd.Next(1, 11);
             Int32 owner = -1;
             Boolean police = false;
             if (steps == 10)
             {
-                if (!_remainedCareerCards.Contains(5))
+                try
                 {
-                    Int32 temp = 0;
-                    foreach (Player player in _playerList)
-                    {
-                        if (player.careerCard == 5)
-                        {
-                            owner = temp;
-                            police = true;
-                        }
-                        ++temp;
-                    }
-                    if(owner == -1)
-                        throw new Exception("A rendőr nem található");
+                    owner = ExistCareer(5);
+                    police = true;
+                }
+                catch (Exception)
+                {
+                    owner = -1;
                 }
             }
             else
             {
-                if (!_remainedStockCards.Contains(steps))
+                try
                 {
-                    Int32 temp = 0;
-                    foreach (Player player in _playerList)
-                    {
-                        if (player.careerCard == 5)
-                            owner = temp;
-                        ++temp;
-                    }
-                    if (owner == -1)
-                        throw new Exception("A karrier nem található");
+                    owner = ExistCareer(steps - 1);
+                }
+                catch (Exception)
+                {
+                    owner = -1;
                 }
             }
-            _playerList[playerNum].actual = false;
-            Int32 nextPlayer = (playerNum+1)%playerNum;
-            while (!_remainedPlayers.Contains(nextPlayer))
-                nextPlayer = (nextPlayer + 1)%playerNum;
             if (owner != -1)
                 _playerList[owner].money += 10000;
             if (police)
@@ -795,33 +884,43 @@ namespace DataModel
         }
 
         /// <summary>
-        /// Játékos léptetése a pályán
+        /// Mező megadása a játékoshoz
         /// </summary>
         /// <param name="playerNum">Játékos száma</param>
-        /// <param name="location">Új mező száma</param>
-        public void GivePlayerLocation(Int32 playerNum, Int32 location)
+        /// <param name="location">Mező száma</param>
+        public void SetPlayerLocation(Int32 playerNum, Int32 location)
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            if (location < 0 || location > 149)
-                throw new ArgumentException("A megadott mező nem létezik", "location");
+            if (location < 0 || location > 151)
+                throw new ArgumentException("A megadott lépés-szám hibás", "location");
             _playerList[playerNum].location = location;
+        }
+
+        /// <summary>
+        /// Az aktuális játékost lépteti.
+        /// </summary>
+        public void NextPlayer()
+        {
+            _actualPlayer = (_actualPlayer + 1) % _playerNumber;
         }
 
         /// <summary>
         /// Save game
         /// </summary>
         /// <param name="filename">Fájl neve</param>
+        /// <param name="sure">Biztosan rá szeretné e menteni?</param>
         /// <returns><c>0</c>, ha a mentés sikeres volt. <c>1</c>, ha a file már létezik. <c>2</c>, ha a mentés sikertelen volt.</returns>
         public Int32 Save(String filename, Boolean sure)
         {
-            if (File.Exists(filename + ".bin") && !sure)
+            filename = filename + ".xml";
+            if (File.Exists(filename) && !sure)
                 return 1;
             try
             {
-                IFormatter formatter = new BinaryFormatter();
-                Stream stream = new FileStream(filename + ".bin", FileMode.Create, FileAccess.Write, FileShare.None);
-                formatter.Serialize(stream, this);
+                Stream stream = File.Open(filename, FileMode.Create);
+                BinaryFormatter bformatter = new BinaryFormatter();
+                bformatter.Serialize(stream, this);
                 stream.Close();
             }
             catch (Exception)
@@ -841,9 +940,9 @@ namespace DataModel
             Int32 temp = 0;
             Int32 maxMoney;
             List<Int32> maxPlayer = new List<int>();
-            while (_playerList[temp].retired != 2 && temp < _playerNumber)
+            while (temp < _playerNumber && _playerList[temp].retired != 2)
             {
-                ++ temp;
+                ++temp;
             }
             if (temp < _playerNumber)
             {
@@ -872,7 +971,7 @@ namespace DataModel
 
                 foreach (int max in maxPlayer)
                 {
-                    _playerList[max].lifeCardNumber += 4%maxPlayer.Count;
+                    _playerList[max].lifeCardNumber += 4 % maxPlayer.Count;
                 }
             }
 
@@ -901,7 +1000,7 @@ namespace DataModel
                 }
                 else
                 {
-                    if(_playerList[i].money == winnerMoney)
+                    if (_playerList[i].money == winnerMoney)
                         winners.Add(i);
                 }
             }
@@ -916,8 +1015,8 @@ namespace DataModel
         /// Konstruktor
         /// </summary>
         /// <param name="playerNum">Játékos száma</param>
-        /// <param name="playerDataList">Játékos neve, neme, AI-e</param>
-        public DataModel(Int32 playerNum, List<Tuple<String, Boolean, Boolean>>playerDataList )
+        /// <param name="playerDataList">Játékos neve, Nő-e, AI-e</param>
+        public DataModel(Int32 playerNum, List<Tuple<String, Boolean, Boolean>> playerDataList)
         {
             if (playerNum < 2 || playerNum > 6)
                 throw new ArgumentException("A megadott játékos-szám hibás", "playerNum");
@@ -929,16 +1028,14 @@ namespace DataModel
                 _playerList[i] = new Player(playerDataList[i].Item1, playerDataList[i].Item2, playerDataList[i].Item3);
             }
             _playerNumber = playerNum;
-            _remainedCareerCards = new List<int> {0, 1, 2, 3, 4, 5, 6, 7, 8};
-            _remainedHouseCards = new List<int> {0, 1, 2, 3, 4, 5, 6, 7, 8};
+            _remainedCareerCards = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+            _remainedHouseCards = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
             _remainedLifeCards = 21;
-            _remainedSalaryCards = new List<int> {0, 1, 2, 3, 4, 5, 6, 7, 8};
-            _remainedStockCards = new List<int> {0, 1, 2, 3, 4, 5, 6, 7, 8};
+            _remainedSalaryCards = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+            _remainedStockCards = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
             _remainedPlayers = new List<int>();
             for (int i = 0; i < playerNum; i++)
                 _remainedPlayers.Add(i);
-            _actualPlayer = 0;
-            _playerList[0].actual = true;
             _rewardForLifeCards = new List<int>();
             for (int i = 0; i < 25; i++)
             {
@@ -961,12 +1058,13 @@ namespace DataModel
         /// <param name="filename">Fájl neve</param>
         public DataModel(String filename)
         {
-            if (File.Exists(filename + ".bin"))
+            filename = filename + ".xml";
+            if (!File.Exists(filename))
                 throw new FileNotFoundException();
-            
-            IFormatter formatter = new BinaryFormatter();
-            Stream stream = new FileStream(filename + ".bin", FileMode.Open, FileAccess.Read, FileShare.Read);
-            DataModel fromFile = ((DataModel)formatter.Deserialize(stream));
+
+            Stream stream = File.Open(filename, FileMode.Open);
+            BinaryFormatter bformatter = new BinaryFormatter();
+            DataModel fromFile = (DataModel)bformatter.Deserialize(stream);
             stream.Close();
 
             _playerList = fromFile._playerList;
@@ -982,6 +1080,5 @@ namespace DataModel
         }
 
         #endregion
-
     }
 }
