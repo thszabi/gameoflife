@@ -198,7 +198,7 @@ namespace GameOfLife.DataModel
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
             if (_playerList[playerNum].salaryCard == 9)
-                throw new ArgumentException("A játékosnak nincs fizetése");
+                return 0;
             return _moneyForSalaryCards[_playerList[playerNum].salaryCard];
         }
 
@@ -372,11 +372,21 @@ namespace GameOfLife.DataModel
         /// <summary>
         /// Megadja a fizetés összegét egy adott fizetés kártyához
         /// </summary>
-        /// <param name="cardnum">Fizetés kárty száma</param>
+        /// <param name="cardnum">Fizetés kártya száma</param>
         /// <returns>Fizetés</returns>
         public Int32 GetMoneyForSalaryCard(Int32 cardnum)
         {
             return _moneyForSalaryCards[cardnum];
+        }
+
+        /// <summary>
+        /// Megadja a biztosítás összegét egy adott birtoklevélhez
+        /// </summary>
+        /// <param name="cardnum">Birtoklevél száma</param>
+        /// <returns>Fizetés</returns>
+        public Int32 GetInsuranceForHouseCard(Int32 cardnum)
+        {
+            return _insuranceForHouseCards[cardnum];
         }
 
         /// <summary>

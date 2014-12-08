@@ -870,7 +870,7 @@ namespace GameOfLife
                     //"1" lekezelése, ha nem gép köre van - a játékost elõre léptetjük eggyel az 1. útvonalon
                     //Ha gép köre van, és "1"-et mondott, lekezeljük
                     if ((oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1) && !model.PlayerPc(model.ActualPlayer)) ||
-                        (model.PlayerPc(model.ActualPlayer) && computer.atFork() == Keys.D1))
+                        (model.PlayerPc(model.ActualPlayer) && computer.atFork1() == Keys.D1))
                     {
                         model.SetPlayerLocation(model.ActualPlayer, 51);
                         --stepsLeft;
@@ -879,7 +879,7 @@ namespace GameOfLife
                     //"2" lekezelése, ha nem gép köre van - a játékost elõre léptetjük eggyel az 2. útvonalon
                     //Ha gép köre van, és "2"-t mondott, lekezeljük
                     if ((oldKeyboardState.IsKeyUp(Keys.D2) && newKeyboardState.IsKeyDown(Keys.D2) && !model.PlayerPc(model.ActualPlayer)) ||
-                        (model.PlayerPc(model.ActualPlayer) && computer.atFork() == Keys.D2))
+                        (model.PlayerPc(model.ActualPlayer) && computer.atFork1() == Keys.D2))
                     {
                         model.SetPlayerLocation(model.ActualPlayer, 57);
                         --stepsLeft;
@@ -893,7 +893,7 @@ namespace GameOfLife
                     //"1" lekezelése, ha nem gép köre van - a játékost elõre léptetjük eggyel az 1. útvonalon
                     //Ha gép köre van, és "1"-et mondott, lekezeljük
                     if ((oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1) && !model.PlayerPc(model.ActualPlayer)) ||
-                        (model.PlayerPc(model.ActualPlayer) && computer.atFork() == Keys.D1))
+                        (model.PlayerPc(model.ActualPlayer) && computer.atFork2() == Keys.D1))
                     {
                         model.SetPlayerLocation(model.ActualPlayer, 87);
                         --stepsLeft;
@@ -902,7 +902,7 @@ namespace GameOfLife
                     //"2" lekezelése, ha nem gép köre van - a játékost elõre léptetjük eggyel a 2. útvonalon
                     //Ha gép köre van, és "2"-t mondott, lekezeljük
                     if ((oldKeyboardState.IsKeyUp(Keys.D2) && newKeyboardState.IsKeyDown(Keys.D2) && !model.PlayerPc(model.ActualPlayer)) ||
-                        (model.PlayerPc(model.ActualPlayer) && computer.atFork() == Keys.D2))
+                        (model.PlayerPc(model.ActualPlayer) && computer.atFork2() == Keys.D2))
                     {
                         model.SetPlayerLocation(model.ActualPlayer, 94);
                         --stepsLeft;
