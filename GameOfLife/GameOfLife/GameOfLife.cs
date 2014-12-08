@@ -184,7 +184,7 @@ namespace GameOfLife
         private SpriteFont instructionsFont;
         private SpriteFont titleFont;
 
-        private String output; //Ez a szöveg jelenik meg a bal felsõ sarokban. Ez mindig látható, ezzel tájékoztatjuk a játékost
+        private Output.GameOfLifeOutput output; //Ez az osztály intézi a bal felsõ sarokba kiírandó szöveget. Ez mindig látható, ezzel tájékoztatjuk a játékost
 
         private Texture2D palya2;
         private Texture2D fullBoard;
@@ -308,6 +308,8 @@ namespace GameOfLife
             graphics.PreferredBackBufferWidth = 956;
             graphics.ApplyChanges();
 
+            output = new Output.GameOfLifeOutput();
+
             Content.RootDirectory = "Content";
         }
 
@@ -336,8 +338,6 @@ namespace GameOfLife
             
             stepsLeft = 0;
             numberSpun = 0;
-
-            output = "";
 
             base.Initialize();
         }
@@ -719,24 +719,24 @@ namespace GameOfLife
                                 case 1: //Otthonbiztosítás vásárlása
                                     if (model.BuyHouseInsurance(model.ActualPlayer))
                                     {
-                                        //TODO kimenet: sikeres vásárlás
+                                        output.Write("Megvetted az lakásbiztosítást.");
                                         arrowPosition = 0;
                                     }
                                     else
                                     {
-                                        //TODO kimenet: sikertelen vásárlás
+                                        output.Write("Nincs elég pénzed lakásbiztosításra!");
                                     }
                                     break;
 
                                 case 2: //Gépjármûbiztosítás vásárlása
                                     if (model.BuyCarInsurance(model.ActualPlayer))
                                     {
-                                        //TODO kimenet: sikeres vásárlás
+                                        output.Write("Megvetted a gépjármûbiztosítást.");
                                         arrowPosition = 0;
                                     }
                                     else
                                     {
-                                        //TODO kimenet: sikertelen vásárlás
+                                        output.Write("Nincs elég pénzed gépjármûbiztosításra!");
                                     }
                                     break;
 
@@ -748,7 +748,7 @@ namespace GameOfLife
                                 case 4: //Hitel visszafizetése
                                     if (model.PayBackLoan(model.ActualPlayer,25000))
                                     {
-                                        //TODO kimenet: sikeres visszafizetés
+                                        output.Write("Visszafizettél egy kölcsönt. ($25000)");
                                         if (model.PlayerLoan(model.ActualPlayer) == 0)
                                         {
                                             arrowPosition = 0;
@@ -756,7 +756,7 @@ namespace GameOfLife
                                     }
                                     else
                                     {
-                                        //TODO kimenet: sikertelen visszafizetés
+                                        output.Write("Nincs elég pénzed visszafizetni a kölcsönt!");
                                     }
                                     break;
 
@@ -781,13 +781,13 @@ namespace GameOfLife
                         if (model.PlayerLocation(model.ActualPlayer) == 0)
                         {
                             gameState = State.COLLEGEORCAREER;
-                            output = "Egyetem (1-es gomb) vagy karrier (2-es gomb)?";
+                            output.ConstantText("Egyetem (1-es gomb) vagy karrier (2-es gomb)?");
                         }
 
                         //Ha a játékos kimarad egy körbõl
                         if (model.PlayerLoseNextRound(model.ActualPlayer))
                         {
-                            //TODO kimenet = a játékos kimaradt egy körbõl, megint te következel!
+                            output.Write(model.PlayerName(model.ActualPlayer) + " kimarad egy körbõl!");
                             model.SetLoseNextRound(model.ActualPlayer, false);
                             EndTurn();
                         }
@@ -812,7 +812,7 @@ namespace GameOfLife
                         model.GetStudentLoan(model.ActualPlayer);
 
                         gameState = State.PLAYERSTURN;
-                        output = "";
+                        output.RemoveConstantText();
                     }
                     //"2" lekezelése, ha nem gép köre van - a játékos a karriert választotta
                     //Ha gép köre van, és "2"-t mondott, akkor lekezeljük
@@ -824,7 +824,7 @@ namespace GameOfLife
                         model.GiveSalary(model.ActualPlayer);
 
                         gameState = State.PLAYERSTURN;
-                        output = "";
+                        output.RemoveConstantText();
                     }
                     break;
                 #endregion
@@ -835,11 +835,13 @@ namespace GameOfLife
                     if (model.PlayerLocation(model.ActualPlayer) == 50)
                     {
                         gameState = State.ATFORK1;
+                        output.ConstantText("Merre mész tovább? (1,2)");
                     }
                     //A  86. mezõ után elágazás következik
                     if (model.PlayerLocation(model.ActualPlayer) == 86)
                     {
                         gameState = State.ATFORK2;
+                        output.ConstantText("Merre mész tovább? (1,2)");
                     }
 
                     if (gameState == State.MOVING && stepsLeft != 0)
@@ -875,6 +877,7 @@ namespace GameOfLife
                         model.SetPlayerLocation(model.ActualPlayer, 51);
                         --stepsLeft;
                         gameState = State.MOVING;
+                        output.RemoveConstantText();
                     }
                     //"2" lekezelése, ha nem gép köre van - a játékost elõre léptetjük eggyel az 2. útvonalon
                     //Ha gép köre van, és "2"-t mondott, lekezeljük
@@ -884,6 +887,7 @@ namespace GameOfLife
                         model.SetPlayerLocation(model.ActualPlayer, 57);
                         --stepsLeft;
                         gameState = State.MOVING;
+                        output.RemoveConstantText();
                     }
                     break;
                 #endregion
@@ -898,6 +902,7 @@ namespace GameOfLife
                         model.SetPlayerLocation(model.ActualPlayer, 87);
                         --stepsLeft;
                         gameState = State.MOVING;
+                        output.RemoveConstantText();
                     }
                     //"2" lekezelése, ha nem gép köre van - a játékost elõre léptetjük eggyel a 2. útvonalon
                     //Ha gép köre van, és "2"-t mondott, lekezeljük
@@ -907,6 +912,7 @@ namespace GameOfLife
                         model.SetPlayerLocation(model.ActualPlayer, 94);
                         --stepsLeft;
                         gameState = State.MOVING;
+                        output.RemoveConstantText();
                     }
                     break;
                 #endregion
@@ -928,7 +934,7 @@ namespace GameOfLife
                         if (model.IsEveryoneRetired)
                         {
                             int winner = model.EndGame()[0];
-                            output = model.PlayerName(winner) + " nyert!";
+                            output.ConstantText(model.PlayerName(winner) + " nyert!");
                             gameEnded = true;
                         }
                         else
@@ -949,7 +955,7 @@ namespace GameOfLife
                         if (model.IsEveryoneRetired)
                         {
                             int winner = model.EndGame()[0];
-                            output = model.PlayerName(winner) + " nyert!";
+                            output.ConstantText(model.PlayerName(winner) + " nyert!");
                             gameEnded = true;
                         }
                         else
@@ -1035,13 +1041,13 @@ namespace GameOfLife
                     {
                         if (model.BuyStock(model.ActualPlayer, arrowPosition))
                         {
-                            output = "Sikeresen megvásároltad a " + (arrowPosition+1) + ". részvényt.";
+                            output.Write("Sikeresen megvásároltad a " + (arrowPosition + 1) + ". részvényt.");
                             arrowPosition = 0;
                             gameState = State.PLAYERSTURN;
                         }
                         else
                         {
-                            output = "Nincs elég pénzed részvényt vásárolni!";
+                            output.Write("Nincs elég pénzed részvényt vásárolni!");
                             arrowPosition = 3;
                             gameState = State.PLAYERSTURN;
                         }
@@ -1098,6 +1104,7 @@ namespace GameOfLife
                         //A karrier kiválasztása után következik a fizetés kiválasztása
                         arrowPosition = 3;
                         gameState = State.CHOOSESALARY;
+                        output.ConstantText("Válassz fizetést! (1,2,3)");
                     }
 
                     break;
@@ -1139,6 +1146,8 @@ namespace GameOfLife
                         //Ha a játékos most végzett az egyetemen, újra pörgethet
                         if (model.PlayerLocation(model.ActualPlayer) == 12)
                         {
+                            output.RemoveConstantText();
+                            output.Write(model.PlayerName(model.ActualPlayer) + " lediplomázott.");
                             spin();
                         }
                         else
@@ -1168,6 +1177,7 @@ namespace GameOfLife
                         Console.WriteLine("A három karrier: " + threeCareers[0] + " " + threeCareers[1] + " " + threeCareers[2]);
                         arrowPosition = 3; //== még nem választott
                         gameState = State.CHOOSEJOB;
+                        output.ConstantText("Válassz! (1,2,3)");
                     }
 
                     //"N" lekezelése, ha nem gép köre van - vége van a körnek
@@ -1190,6 +1200,18 @@ namespace GameOfLife
                     {
                         arrowPosition = 6; //== még nem választott
                         gameState = State.TRADEWITHWHO;
+
+                        String listOfPlayersInAString = "";
+                        for (int i = 1; i <= model.NumberOfPlayers; ++i)
+                        {
+                            if (model.ActualPlayer + 1 != i)
+                            {
+                                listOfPlayersInAString += i + ",";
+                            }
+                        }
+                        listOfPlayersInAString.Remove(listOfPlayersInAString.Length - 2);
+
+                        output.ConstantText("Kivel cserélsz? (" + listOfPlayersInAString + ")");
                     }
 
                     //"N" lekezelése, ha nem gép köre van - vége van a körnek
@@ -1268,6 +1290,7 @@ namespace GameOfLife
             }//switch (gameState)
 
             oldKeyboardState = newKeyboardState;
+            output.Update(gameTime.ElapsedGameTime.TotalMilliseconds);
             base.Update(gameTime);
         }
 
@@ -1285,11 +1308,11 @@ namespace GameOfLife
             {
                 if (spinResult.Item1 == 10)
                 {
-                    //TODO kimenet: gyorshajtás! Az x. játékos kap 10.000-ret
+                    output.Write("Gyorshajtás! " + model.PlayerName(model.ActualPlayer) + " fizet $10.000-et " + model.PlayerName(spinResult.Item2) + "nak.");
                 }
                 else
                 {
-                    //TODO kimenet: az x. játékos kap 10.000-et a részvénye miatt.
+                    output.Write(model.PlayerName(spinResult.Item2) + " kap $10.000-et a részvénye miatt.");
                 }
             }
 
@@ -1348,7 +1371,7 @@ namespace GameOfLife
             if (locationsOfPayDays.Contains(model.PlayerLocation(model.ActualPlayer)))
             {
                 model.PayDay(model.ActualPlayer);
-                //TODO kimenet: fizetésnap
+                output.Write("Fizetésnap!");
             }
 
         }
@@ -1359,6 +1382,7 @@ namespace GameOfLife
         /// </summary>
         private void EffectOfField(int fieldNumber)
         {
+            output.Write(model.PlayerName(model.ActualPlayer) + " a " + fieldNumber + " mezõre érkezett."); //TODO törölni!
             if (locationsOfLIFEs.Contains(fieldNumber))
             {
                 //TODO StealLifeCard
@@ -1394,6 +1418,7 @@ namespace GameOfLife
                     Console.WriteLine("A három karrier: " + threeCareers[0] + " " + threeCareers[1] + " " + threeCareers[2]);
                     arrowPosition = 3;
                     gameState = State.CHOOSEJOB;
+                    output.ConstantText("Válassz munkát! (1,2,3)");
                     break;
 
                 case 16:
@@ -1410,6 +1435,7 @@ namespace GameOfLife
                 case 27:
                     model.Marry(model.ActualPlayer);
                     model.GetLifeCard(model.ActualPlayer);
+                    output.Write(model.PlayerName(model.ActualPlayer) + " megházasodott.");
                     spin();
                     break;
 
@@ -1434,7 +1460,7 @@ namespace GameOfLife
 
                 case 33:
                 case 70:
-                    output = "Váltasz munkát? (I/N)";
+                    output.ConstantText("Váltasz munkát? (I/N)");
                     gameState = State.CHANGEJOB;
                     break;
 
@@ -1452,6 +1478,7 @@ namespace GameOfLife
 
                 case 38:
                     model.GiveHouse(model.ActualPlayer);
+                    output.Write(model.PlayerName(model.ActualPlayer) + " lakást vásárolt.");
                     spin();
                     break;
 
@@ -1523,7 +1550,7 @@ namespace GameOfLife
                 case 109:
                 case 122:
                 case 133:
-                    output = "Elcseréled a fizetésed?";
+                    output.ConstantText("Elcseréled a fizetésed?");
                     gameState = State.TRADESALARY;
                     break;
 
@@ -1678,6 +1705,7 @@ namespace GameOfLife
 
                 case 149:
                     gameState = State.CHOOSERETIREMENT;
+                    output.ConstantText("Hova mész nyugdíjba? (1,2)");
                     break;
 
 
@@ -1692,6 +1720,7 @@ namespace GameOfLife
             arrowPosition = 0;
             model.NextPlayer();
             gameState = State.PLAYERSTURN;
+            output.RemoveConstantText();
 
             #region Writing to console
 
@@ -2070,7 +2099,7 @@ namespace GameOfLife
             String playersCard = model.PlayerLifeCardNumber(model.ActualPlayer).ToString();
             spriteBatch.DrawString(titleFont, playersCard, new Vector2(630, 595), Color.White);
 
-            spriteBatch.DrawString(titleFont, output, new Vector2(10, 10), Color.White); //T.SZ. itt volt egy if gameState = COLLEGEORCAREER, de már nem kell, ugyanis az outputot mindig ki kell írni a bal felsõ sarokba. A tartalmát az update adja meg
+            spriteBatch.DrawString(titleFont, output.GetOutput(), new Vector2(10, 10), Color.White); //T.SZ. az output most már nem egy sima String, hanem egy osztály, aminek a GetOutput függvénye adja vissza a kiírandó szöveget
 
             if (model.PlayerGender(model.ActualPlayer))
             {
