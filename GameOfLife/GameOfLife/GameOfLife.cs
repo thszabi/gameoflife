@@ -187,6 +187,112 @@ namespace GameOfLife
         private String output; //Ez a szöveg jelenik meg a bal felsõ sarokban. Ez mindig látható, ezzel tájékoztatjuk a játékost
 
         private Texture2D palya2;
+        private Texture2D fullBoard;
+
+        #region Array of positions of fields
+        Tuple<int, int>[] fields = {
+	        new Tuple<int, int>(1125, 2425),
+	        new Tuple<int, int>(940, 2425),
+	        new Tuple<int, int>(790, 2470),
+	        new Tuple<int, int>(790, 2625),
+	        new Tuple<int, int>(940, 2675),
+	        new Tuple<int, int>(1078, 2675),
+	        new Tuple<int, int>(1213, 2675),
+	        new Tuple<int, int>(1350, 2675),
+	        new Tuple<int, int>(1480, 2675),
+	        new Tuple<int, int>(1615, 2675),
+	        new Tuple<int, int>(1745, 2665),
+	        new Tuple<int, int>(1880, 2665),
+	        new Tuple<int, int>(1395, 2390),
+	        new Tuple<int, int>(1645, 2425),
+	        new Tuple<int, int>(1820, 2415),
+	        new Tuple<int, int>(2000, 2465),
+	        new Tuple<int, int>(2045, 2625),
+	        new Tuple<int, int>(2245, 2660),
+	        new Tuple<int, int>(2360, 2540),
+	        new Tuple<int, int>(2365, 2375),
+	        new Tuple<int, int>(2310, 2200),
+	        new Tuple<int, int>(2330, 2085),
+	        new Tuple<int, int>(2370, 1970),
+	        new Tuple<int, int>(2270, 1895),
+	        new Tuple<int, int>(2180, 2005),
+	        new Tuple<int, int>(2090, 2135),
+	        new Tuple<int, int>(1940, 2250),
+	        new Tuple<int, int>(1780, 2090),
+	        new Tuple<int, int>(1835, 1925),
+	        new Tuple<int, int>(1910, 1815),
+	        new Tuple<int, int>(1990, 1700),
+	        new Tuple<int, int>(2140, 1650),
+	        new Tuple<int, int>(2285, 1630),
+	        new Tuple<int, int>(2350, 1505),
+	        new Tuple<int, int>(2265, 1390),
+	        new Tuple<int, int>(2120, 1370),
+	        new Tuple<int, int>(1690, 1370),
+	        new Tuple<int, int>(1820, 1370),
+	        new Tuple<int, int>(1655, 1380),
+	        new Tuple<int, int>(1500, 1380),
+	        new Tuple<int, int>(1355, 1385),
+	        new Tuple<int, int>(1190, 1390),
+	        new Tuple<int, int>(1045, 1385),
+	        new Tuple<int, int>(890, 1350),
+	        new Tuple<int, int>(740, 1310),
+	        new Tuple<int, int>(585, 1310),
+	        new Tuple<int, int>(445, 1315),
+	        new Tuple<int, int>(330, 1260),
+	        new Tuple<int, int>(265, 1150),
+	        new Tuple<int, int>(265, 990),
+	        new Tuple<int, int>(265, 825),
+	        new Tuple<int, int>(275, 640),
+	        new Tuple<int, int>(305, 460),
+	        new Tuple<int, int>(370, 325),
+	        new Tuple<int, int>(465, 200),
+	        new Tuple<int, int>(590, 145),
+	        new Tuple<int, int>(400, 885),
+	        new Tuple<int, int>(540, 865),
+	        new Tuple<int, int>(655, 795),
+	        new Tuple<int, int>(660, 655),
+	        new Tuple<int, int>(665, 520),
+	        new Tuple<int, int>(670, 395),
+	        new Tuple<int, int>(695, 270),
+	        new Tuple<int, int>(735, 150),
+	        new Tuple<int, int>(900, 190),
+	        new Tuple<int, int>(970, 325),
+	        new Tuple<int, int>(975, 470),
+	        new Tuple<int, int>(1070, 555),
+	        new Tuple<int, int>(1220, 555),
+	        new Tuple<int, int>(1360, 560),
+	        new Tuple<int, int>(1500, 535),
+	        new Tuple<int, int>(1060, 470),
+	        new Tuple<int, int>(1775, 335),
+	        new Tuple<int, int>(1960, 210),
+	        new Tuple<int, int>(2125, 225),
+	        new Tuple<int, int>(2215, 325),
+	        new Tuple<int, int>(2265, 465),
+	        new Tuple<int, int>(2273, 645),
+	        new Tuple<int, int>(2280, 770),
+	        new Tuple<int, int>(2285, 900),
+	        new Tuple<int, int>(2300, 1030),
+	        new Tuple<int, int>(2295, 1160),
+	        new Tuple<int, int>(2180, 1210),
+	        new Tuple<int, int>(2045, 1215),
+	        new Tuple<int, int>(1910, 1220),
+	        new Tuple<int, int>(1780, 1210),
+	        new Tuple<int, int>(1640, 1225),
+	        new Tuple<int, int>(1515, 1220),
+	        new Tuple<int, int>(1370, 1220),
+	        new Tuple<int, int>(1240, 1230),
+	        new Tuple<int, int>(1100, 1230),
+	        new Tuple<int, int>(975, 1210),
+	        new Tuple<int, int>(975, 1095),
+	        new Tuple<int, int>(1735, 1100),
+	        new Tuple<int, int>(1605, 1065),
+	        new Tuple<int, int>(1465, 1070),
+	        new Tuple<int, int>(1340, 1070),
+	        new Tuple<int, int>(1145, 1060),
+	        new Tuple<int, int>(1170, 935),
+	        new Tuple<int, int>(1300, 920)
+        };
+        #endregion
 
         #endregion
         #region Constructor
@@ -364,6 +470,7 @@ namespace GameOfLife
             titleFont = Content.Load<SpriteFont>("Instructions_title");
 
             palya2 = Content.Load<Texture2D>("palya3");
+            fullBoard = Content.Load<Texture2D>("fullBoard");
         }
 
 
@@ -1900,6 +2007,14 @@ namespace GameOfLife
             base.Draw(gameTime);
         }
 
+        private Rectangle getSourceRectangle()
+        {
+            int x, y;
+            x = fields[model.PlayerLocation(model.ActualPlayer)].Item1 - 478;
+            y = fields[model.PlayerLocation(model.ActualPlayer)].Item2 - 255;
+            return new Rectangle(x, y, 956, 511);
+        }
+
         private void DrawUI() //T.SZ. kiemeltem a közös részt. A kurzor kirajzolása nincs benne
         {
             /* Ezt a függvényt a következõképp kell használni.
@@ -1907,7 +2022,10 @@ namespace GameOfLife
             Használni kell, majd utána a kurzort kirajzolni: PLAYERSTURN
             Használni kell, de utána nem kell a kurzor:      QUITTING, COLLEGEORCAREER, MOVING, CHOOSESTOCK, CHOOSEJOB, CHOOSESALARY, CHANGEJOB, ATFORK1, ATFORK2, TRADESALARY, TRADEWITHWHO, CHOOSERETIREMENT
             */
+            
             spriteBatch.Draw(palya2, new Rectangle(0, 0, 956, 835), Color.White);
+            spriteBatch.Draw(fullBoard, new Vector2(0, 64), getSourceRectangle(), Color.White);
+            Tuple<int, int>[] fields = { new Tuple<int, int>(0, 0), new Tuple<int, int>(0, 0) };
 
             spriteBatch.Draw(saveBtn, new Rectangle(660, 15, 105, 35), Color.White);
             spriteBatch.Draw(escapeBtn2, new Rectangle(820, 15, 105, 35), Color.White);
