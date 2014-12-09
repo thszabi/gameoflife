@@ -189,9 +189,18 @@ namespace GameOfLife
         private Texture2D palya2;
         private Texture2D fullBoard;
 
+        Texture2D[] pieces = new Texture2D[6];
+        private Texture2D piece1;
+        private Texture2D piece2;
+        private Texture2D piece3;
+        private Texture2D piece4;
+        private Texture2D piece5;
+        private Texture2D piece6;
+
         #region Array of positions of fields
         Tuple<int, int>[] fields = {
-	        new Tuple<int, int>(1125, 2425),
+            new Tuple<int, int>(1268, 2278),
+            new Tuple<int, int>(1125, 2425),
 	        new Tuple<int, int>(940, 2425),
 	        new Tuple<int, int>(790, 2470),
 	        new Tuple<int, int>(790, 2625),
@@ -471,6 +480,19 @@ namespace GameOfLife
 
             palya2 = Content.Load<Texture2D>("palya3");
             fullBoard = Content.Load<Texture2D>("fullBoard");
+
+            piece1 = Content.Load<Texture2D>("player1");
+            piece2 = Content.Load<Texture2D>("player2");
+            piece3 = Content.Load<Texture2D>("player3");
+            piece4 = Content.Load<Texture2D>("player4");
+            piece5 = Content.Load<Texture2D>("player5");
+            piece6 = Content.Load<Texture2D>("player6");
+            pieces[0] = piece1;
+            pieces[1] = piece2;
+            pieces[2] = piece3;
+            pieces[3] = piece4;
+            pieces[4] = piece5;
+            pieces[5] = piece6;
         }
 
 
@@ -2054,7 +2076,7 @@ namespace GameOfLife
             
             spriteBatch.Draw(palya2, new Rectangle(0, 0, 956, 835), Color.White);
             spriteBatch.Draw(fullBoard, new Vector2(0, 64), getSourceRectangle(), Color.White);
-            Tuple<int, int>[] fields = { new Tuple<int, int>(0, 0), new Tuple<int, int>(0, 0) };
+            spriteBatch.Draw(pieces[model.ActualPlayer], new Rectangle(478, 319, 30, 30), Color.White);
 
             spriteBatch.Draw(saveBtn, new Rectangle(660, 15, 105, 35), Color.White);
             spriteBatch.Draw(escapeBtn2, new Rectangle(820, 15, 105, 35), Color.White);
