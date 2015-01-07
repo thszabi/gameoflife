@@ -25,7 +25,7 @@ namespace GameOfLife.DataModel
 
         #region Get Game Data
 
-        public Int32 ActualPlayer { get { if (_remainedPlayers.Count > 0) return _actualPlayer; return -1; } set { _actualPlayer = value; } }
+        public Int32 ActualPlayer { get { if (_remainedPlayers.Count > 0) return _actualPlayer; return 0;/*-1;*/ } set { _actualPlayer = value; } }
         public Int32 NumberOfPlayers { get { return _playerNumber; } }
         public Boolean IsEveryoneRetired { get { return _remainedPlayers.Count == 0; } }
 
@@ -878,7 +878,22 @@ namespace GameOfLife.DataModel
             {
                 try
                 {
-                    owner = ExistCareer(steps - 1);
+                    if (_remainedStockCards.Contains(steps - 1))
+                    {
+                        owner = -1;
+                    }
+                    else
+                    {
+                        Int32 temp = 0;
+                        foreach (Player player in _playerList)
+                        {
+                            if (player.stockCard == (steps - 1))
+                            {
+                                owner = temp;
+                            }
+                            ++temp;
+                        }
+                    }
                 }
                 catch (Exception)
                 {
