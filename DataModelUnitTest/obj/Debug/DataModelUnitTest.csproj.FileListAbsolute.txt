@@ -5,3 +5,10 @@ C:\Users\S-Home\Documents\Tanulás\szoftech\GameOfLife\DataModelUnitTest\bin\Deb
 C:\Users\S-Home\Documents\Tanulás\szoftech\GameOfLife\DataModelUnitTest\obj\Debug\DataModelUnitTest.csprojResolveAssemblyReference.cache
 C:\Users\S-Home\Documents\Tanulás\szoftech\GameOfLife\DataModelUnitTest\obj\Debug\DataModelUnitTest.dll
 C:\Users\S-Home\Documents\Tanulás\szoftech\GameOfLife\DataModelUnitTest\obj\Debug\DataModelUnitTest.pdb
+C:\Users\haotaai\Documents\proj\branches\ho\DataModelUnitTest\bin\Debug\DataModelUnitTest.dll
+C:\Users\haotaai\Documents\proj\branches\ho\DataModelUnitTest\bin\Debug\DataModelUnitTest.pdb
+C:\Users\haotaai\Documents\proj\branches\ho\DataModelUnitTest\bin\Debug\DataModel.dll
+C:\Users\haotaai\Documents\proj\branches\ho\DataModelUnitTest\bin\Debug\DataModel.pdb
+C:\Users\haotaai\Documents\proj\branches\ho\DataModelUnitTest\obj\Debug\DataModelUnitTest.csprojResolveAssemblyReference.cache
+C:\Users\haotaai\Documents\proj\branches\ho\DataModelUnitTest\obj\Debug\DataModelUnitTest.dll
+C:\Users\haotaai\Documents\proj\branches\ho\DataModelUnitTest\obj\Debug\DataModelUnitTest.pdb

@@ -65,20 +65,31 @@ namespace DataModelUnitTest
         }
 
         [TestMethod]
+        public void HouseInsurance()
+        {
+            CreatePlayers();
+            model.GiveMoney(1, 1000000);
+            model.GiveHouse(1);
+            Assert.IsTrue(model.BuyHouseInsurance(1));
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(Exception))]
-        public void HouseInsurance_Exception()
+        public void HouseInsurance_Exception_Nohouse()
         {
             CreatePlayers();
             model.BuyHouseInsurance(1);
         }
 
         [TestMethod]
-        public void HouseInsurance_True()
+        [ExpectedException(typeof(Exception))]
+        public void HouseInsurance_Exception_HasIns()
         {
             CreatePlayers();
             model.GiveMoney(1, 1000000);
             model.GiveHouse(1);
-            Assert.IsTrue(model.BuyHouseInsurance(1));
+            model.BuyHouseInsurance(1);
+            model.BuyHouseInsurance(1);
         }
 
         [TestMethod]
@@ -150,8 +161,8 @@ namespace DataModelUnitTest
         {
             CreatePlayers();
             model.GetStudentLoan(1);
-            Assert.AreEqual(model.PlayerMoney(1), 0);
-            Assert.AreEqual(model.PlayerLoan(1), 50000);
+            Assert.AreEqual(0, model.PlayerMoney(1));
+            Assert.AreEqual(40000, model.PlayerLoan(1));
         }
 
         [TestMethod]
@@ -265,14 +276,14 @@ namespace DataModelUnitTest
             Assert.IsFalse(model.PayMoney(1, 1000));
         }
 
-       /* [TestMethod]
-        public void NextPlayer()
+        [TestMethod]
+        public void StealLifeCard()
         {
             CreatePlayers();
             model.ActualPlayer = 3;
             model.NextPlayer();
             Assert.AreEqual(model.ActualPlayer, 0);
-        }*/
+        }
         
         [TestMethod]
         public void StockCardAvailability()
@@ -320,13 +331,13 @@ namespace DataModelUnitTest
             model.GiveMoney(1,10000);
             model.GiveCareer(0);
             model.GetLoan(0,10000);
-            model.Save("C:/Users/S-Home/Documents/blabla", true);
+            model.Save("./blabla", true);
         }
 
         [TestMethod]
         public void Load()
         {
-            model = new DataModel("C:/Users/S-Home/Documents/blabla");
+            model = new DataModel("./blabla");
             Assert.IsTrue(model.PlayerDegree(1));
             Assert.AreEqual(model.PlayerChildrenNumber(1),1);
             Assert.AreEqual(model.PlayerMoney(0), 10100);
