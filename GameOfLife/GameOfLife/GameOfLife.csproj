@@ -93,6 +93,7 @@
     <Reference Include="System">
       <Private>False</Private>
     </Reference>
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml">
       <Private>False</Private>
     </Reference>
@@ -127,10 +128,6 @@
     <ProjectReference Include="..\GameOfLifeContent\GameOfLifeContent.contentproj">
       <Name>GameOfLifeContent</Name>
       <XnaReferenceType>Content</XnaReferenceType>
-    </ProjectReference>
-    <ProjectReference Include="..\GameOfLifeOutput\GameOfLifeOutput.csproj">
-      <Project>{7952546f-7336-4fc0-8dd5-0db0ebc420f2}</Project>
-      <Name>GameOfLifeOutput</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

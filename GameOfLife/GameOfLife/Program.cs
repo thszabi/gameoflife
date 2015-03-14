@@ -8,6 +8,7 @@ namespace GameOfLife
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
+        [STAThread]
         static void Main(string[] args)
         {
             using (GameOfLife game = new GameOfLife())

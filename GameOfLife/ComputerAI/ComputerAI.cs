@@ -11,7 +11,8 @@ namespace GameOfLife.ComputerAI
     public class ComputerAI
     {
         private readonly DataModel.DataModel model;
-        private List<Int32> _careerPriority = new List<int> { 8, 6, 9, 7, 3, 5, 4, 1, 2, 10 };
+        private List<Int32> _careerPriority = new List<int> { 2, 4, 1, 3, 7, 5, 6, 9, 8, 10 }; //T.SZ.
+        
 
         public ComputerAI(DataModel.DataModel receivedModel)
         {
@@ -215,13 +216,17 @@ namespace GameOfLife.ComputerAI
             Int32 priority0 = _careerPriority[jobs[0]];
             Int32 priority1 = _careerPriority[jobs[1]];
             Int32 priority2 = _careerPriority[jobs[2]];
-            if(priority0 > priority1 && priority0 > priority2)
+            if(priority0 > priority1 && priority0 > priority2 &&
+                (model.PlayerDegree(model.ActualPlayer) ||
+                !model.PlayerDegree(model.ActualPlayer) && jobs[0] < 6)) //T.SZ.
             {
                 return 0;
             }
             else
             {
-                if(priority1 > priority0 && priority1 > priority2)
+                if(priority1 > priority0 && priority1 > priority2 &&
+                    (model.PlayerDegree(model.ActualPlayer) ||
+                    !model.PlayerDegree(model.ActualPlayer) && jobs[1] < 6)) //T.SZ.
                 {
                     return 1;
                 }

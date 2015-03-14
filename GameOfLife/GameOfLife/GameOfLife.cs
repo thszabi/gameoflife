@@ -18,7 +18,7 @@ namespace GameOfLife
     {
         enum State { MAINMENU, INSTRUCTIONS, QUITTING, NUMBEROFPLAYERS, COLLEGEORCAREER, 
                      PLAYERSTURN, MOVING, CHOOSESTOCK, CHOOSEJOB, CHOOSESALARY, 
-                     CHANGEJOB, ATFORK1, ATFORK2, TRADESALARY, TRADEWITHWHO, CHOOSERETIREMENT };
+                     CHANGEJOB, ATFORK1, ATFORK2, TRADESALARY, TRADEWITHWHO, CHOOSERETIREMENT, GIVINGAWARDS};
 
         #region Variables for Update
 
@@ -80,6 +80,8 @@ namespace GameOfLife
 
         private bool gameEnded; //Igaz, ha mindenki a célba ért, és kiírásra került a végeredmény. 
         private double elapsedSinceMoving; //Mennyi idõ telt el az utolsó stepForward óta
+        private bool waiting;
+        private float waitTime;
         
         private int stepsLeft; //Hányat lép még a játékos a pörgetés után
         private int numberSpun; //Hányat pörgetett a játékos
@@ -135,6 +137,7 @@ namespace GameOfLife
         private Texture2D houseImg;
         private Texture2D collegeImg;
         private Texture2D careerImg;
+        private Texture2D salaryImg;
 
 
         Texture2D[] stockes = new Texture2D[9];
@@ -184,10 +187,13 @@ namespace GameOfLife
         private SpriteFont instructionsFont;
         private SpriteFont titleFont;
 
-        private Output.GameOfLifeOutput output; //Ez az osztály intézi a bal felsõ sarokba kiírandó szöveget. Ez mindig látható, ezzel tájékoztatjuk a játékost
+        private String output; //Ez az osztály intézi a bal felsõ sarokba kiírandó szöveget. Ez mindig látható, ezzel tájékoztatjuk a játékost
 
         private Texture2D palya2;
-        private Texture2D fullBoard;
+        private Texture2D boardTopLeft;
+        private Texture2D boardTopRight;
+        private Texture2D boardBottomLeft;
+        private Texture2D boardBottomRight;
 
         Texture2D[] pieces = new Texture2D[6];
         private Texture2D piece1;
@@ -199,159 +205,158 @@ namespace GameOfLife
 
         #region Array of positions of fields
         Tuple<int, int>[] fields = {
-            new Tuple<int, int>(1268, 2278),
-            new Tuple<int, int>(1125, 2425),
-	        new Tuple<int, int>(940, 2425),
-	        new Tuple<int, int>(790, 2470),
-	        new Tuple<int, int>(790, 2625),
-	        new Tuple<int, int>(940, 2675),
-	        new Tuple<int, int>(1078, 2675),
-	        new Tuple<int, int>(1213, 2675),
-	        new Tuple<int, int>(1350, 2675),
-	        new Tuple<int, int>(1480, 2675),
-	        new Tuple<int, int>(1615, 2675),
-	        new Tuple<int, int>(1745, 2665),
-	        new Tuple<int, int>(1880, 2665),
-	        new Tuple<int, int>(1395, 2390),
-	        new Tuple<int, int>(1645, 2425),
-	        new Tuple<int, int>(1820, 2415),
-	        new Tuple<int, int>(2000, 2465),
-	        new Tuple<int, int>(2045, 2625),
-	        new Tuple<int, int>(2245, 2660),
-	        new Tuple<int, int>(2360, 2540),
-	        new Tuple<int, int>(2365, 2375),
-	        new Tuple<int, int>(2310, 2200),
-	        new Tuple<int, int>(2330, 2085),
-	        new Tuple<int, int>(2370, 1970),
-	        new Tuple<int, int>(2270, 1895),
-	        new Tuple<int, int>(2180, 2005),
-	        new Tuple<int, int>(2090, 2135),
-	        new Tuple<int, int>(1940, 2250),
-	        new Tuple<int, int>(1780, 2090),
-	        new Tuple<int, int>(1835, 1925),
-	        new Tuple<int, int>(1910, 1815),
-	        new Tuple<int, int>(1990, 1700),
-	        new Tuple<int, int>(2140, 1650),
-	        new Tuple<int, int>(2285, 1630),
-	        new Tuple<int, int>(2350, 1505),
-	        new Tuple<int, int>(2265, 1390),
-	        new Tuple<int, int>(2120, 1370),
-	        new Tuple<int, int>(1968, 1370),
-	        new Tuple<int, int>(1820, 1370),
-	        new Tuple<int, int>(1655, 1380),
-	        new Tuple<int, int>(1500, 1380),
-	        new Tuple<int, int>(1355, 1385),
-	        new Tuple<int, int>(1190, 1390),
-	        new Tuple<int, int>(1045, 1385),
-	        new Tuple<int, int>(890, 1350),
-	        new Tuple<int, int>(740, 1310),
-	        new Tuple<int, int>(585, 1310),
-	        new Tuple<int, int>(445, 1315),
-	        new Tuple<int, int>(330, 1260),
-	        new Tuple<int, int>(265, 1150),
-	        new Tuple<int, int>(265, 990),
-	        new Tuple<int, int>(265, 825),
-	        new Tuple<int, int>(275, 640),
-	        new Tuple<int, int>(305, 460),
-	        new Tuple<int, int>(370, 325),
-	        new Tuple<int, int>(465, 200),
-	        new Tuple<int, int>(590, 145),
-	        new Tuple<int, int>(400, 885),
-	        new Tuple<int, int>(540, 865),
-	        new Tuple<int, int>(655, 795),
-	        new Tuple<int, int>(660, 655),
-	        new Tuple<int, int>(665, 520),
-	        new Tuple<int, int>(670, 395),
-	        new Tuple<int, int>(695, 270),
-	        new Tuple<int, int>(735, 150),
-	        new Tuple<int, int>(900, 190),
-	        new Tuple<int, int>(970, 325),
-	        new Tuple<int, int>(975, 470),
-	        new Tuple<int, int>(1070, 555),
-	        new Tuple<int, int>(1220, 555),
-	        new Tuple<int, int>(1360, 560),
-	        new Tuple<int, int>(1500, 535),
-	        new Tuple<int, int>(1654, 470),
-	        new Tuple<int, int>(1775, 335),
-	        new Tuple<int, int>(1960, 210),
-	        new Tuple<int, int>(2125, 225),
-	        new Tuple<int, int>(2215, 325),
-	        new Tuple<int, int>(2265, 465),
-	        new Tuple<int, int>(2273, 645),
-	        new Tuple<int, int>(2280, 770),
-	        new Tuple<int, int>(2285, 900),
-	        new Tuple<int, int>(2300, 1030),
-	        new Tuple<int, int>(2295, 1160),
-	        new Tuple<int, int>(2180, 1210),
-	        new Tuple<int, int>(2045, 1215),
-	        new Tuple<int, int>(1910, 1220),
-	        new Tuple<int, int>(1780, 1210),
-	        new Tuple<int, int>(1640, 1225),
-	        new Tuple<int, int>(1515, 1220),
-	        new Tuple<int, int>(1370, 1220),
-	        new Tuple<int, int>(1240, 1230),
-	        new Tuple<int, int>(1100, 1230),
-	        new Tuple<int, int>(975, 1210),
-	        new Tuple<int, int>(975, 1095),
-	        new Tuple<int, int>(1735, 1100),
-	        new Tuple<int, int>(1605, 1065),
-	        new Tuple<int, int>(1465, 1070),
-	        new Tuple<int, int>(1340, 1070),
-	        new Tuple<int, int>(1145, 1060),
-	        new Tuple<int, int>(1170, 935),
-	        new Tuple<int, int>(1300, 920),
-
-	        new Tuple<int, int>(1417, 917),
-	        new Tuple<int, int>(1537, 917),
-	        new Tuple<int, int>(1654, 917),
-	        new Tuple<int, int>(1769, 887),
-	        new Tuple<int, int>(1807, 765),
-	        new Tuple<int, int>(1822, 648),
-	        new Tuple<int, int>(1940, 651),
-	        new Tuple<int, int>(1953, 761),
-	        new Tuple<int, int>(1995, 860),
-	        new Tuple<int, int>(2098, 858),
-	        new Tuple<int, int>(2114, 737),
-	        new Tuple<int, int>(2095, 584),
-	        new Tuple<int, int>(1970, 513),
-	        new Tuple<int, int>(1874, 406),
-	        new Tuple<int, int>(1629, 299),
-	        new Tuple<int, int>(1550, 146),
-	        new Tuple<int, int>(1410, 113),
-	        new Tuple<int, int>(1270, 113),
-	        new Tuple<int, int>(1155, 113),
-	        new Tuple<int, int>(1013, 148),
-	        new Tuple<int, int>(834, 307),
-	        new Tuple<int, int>(810, 452),
-	        new Tuple<int, int>(810, 605),
-	        new Tuple<int, int>(810, 754),
-	        new Tuple<int, int>(738, 925),
-	        new Tuple<int, int>(580, 1007),
-	        new Tuple<int, int>(430, 1040),
-	        new Tuple<int, int>(430, 1146),
-	        new Tuple<int, int>(561, 1168),
-	        new Tuple<int, int>(741, 1175),
-	        new Tuple<int, int>(795, 1449),
-	        new Tuple<int, int>(702, 1581),
-	        new Tuple<int, int>(558, 1624),
-	        new Tuple<int, int>(408, 1598),
-	        new Tuple<int, int>(247, 1538),
-	        new Tuple<int, int>(130, 1610),
-	        new Tuple<int, int>(130, 1770),
-	        new Tuple<int, int>(130, 1914),
-	        new Tuple<int, int>(130, 2055),
-	        new Tuple<int, int>(130, 2211),
-	        new Tuple<int, int>(130, 2351),
-	        new Tuple<int, int>(130, 2501),
-	        new Tuple<int, int>(146, 2645),
-	        new Tuple<int, int>(302, 2665),
-	        new Tuple<int, int>(449, 2619),
-	        new Tuple<int, int>(441, 2464),
-	        new Tuple<int, int>(298, 2412),
-	        new Tuple<int, int>(300, 2280),
-	        new Tuple<int, int>(490, 2248),
-	        new Tuple<int, int>(375, 2076),
-	        new Tuple<int, int>(705, 2243)
+            new Tuple<int, int>(1013, 1277), //0 BottomRight
+            new Tuple<int, int>(769, 1385), //1
+	        new Tuple<int, int>(605, 1361),
+	        new Tuple<int, int>(465, 1389),
+	        new Tuple<int, int>(361, 1609),
+	        new Tuple<int, int>(605, 1649),
+	        new Tuple<int, int>(749, 1657),
+	        new Tuple<int, int>(909, 1657),
+	        new Tuple<int, int>(1073, 1661),
+	        new Tuple<int, int>(1225, 1645),
+	        new Tuple<int, int>(1397, 1649), //10
+	        new Tuple<int, int>(1561, 1657),
+	        new Tuple<int, int>(1725, 1661), //12
+	        new Tuple<int, int>(1245, 1409), //13
+	        new Tuple<int, int>(1449, 1357),
+	        new Tuple<int, int>(1669, 1365),
+	        new Tuple<int, int>(1913, 1425),
+	        new Tuple<int, int>(1913, 1661), //17
+	        new Tuple<int, int>(2141, 1721),
+	        new Tuple<int, int>(2273, 1533),
+	        new Tuple<int, int>(2285, 1357), //20
+	        new Tuple<int, int>(2217, 1161),
+	        new Tuple<int, int>(2241, 1001),
+	        new Tuple<int, int>(2385, 889),
+	        new Tuple<int, int>(2225, 825),
+	        new Tuple<int, int>(2085, 913),
+	        new Tuple<int, int>(1961, 1037),
+	        new Tuple<int, int>(1821, 1201), //27
+	        new Tuple<int, int>(1645, 1021),
+	        new Tuple<int, int>(1729, 849),
+	        new Tuple<int, int>(1805, 745), //30
+	        new Tuple<int, int>(1853, 525),
+	        new Tuple<int, int>(2053, 453),
+	        new Tuple<int, int>(2225, 441),
+	        new Tuple<int, int>(2313, 345),
+	        new Tuple<int, int>(2217, 237),
+	        new Tuple<int, int>(2037, 217),
+	        new Tuple<int, int>(1849, 217),
+	        new Tuple<int, int>(1677, 177), //38
+	        new Tuple<int, int>(1485, 201),
+	        new Tuple<int, int>(1301, 161), //40
+	        new Tuple<int, int>(1129, 217),
+	        new Tuple<int, int>(933, 249),
+	        new Tuple<int, int>(761, 229), //43 BottomRight
+	        new Tuple<int, int>(973, 1569), //44 TopLeft
+	        new Tuple<int, int>(825, 1561),
+	        new Tuple<int, int>(649, 1637),
+	        new Tuple<int, int>(481, 1569),
+	        new Tuple<int, int>(325, 1577),
+	        new Tuple<int, int>(305, 1409),
+	        new Tuple<int, int>(313, 1233), //50
+	        new Tuple<int, int>(201, 1017), //51
+	        new Tuple<int, int>(209, 785),
+	        new Tuple<int, int>(237, 581),
+	        new Tuple<int, int>(325, 397),
+	        new Tuple<int, int>(453, 249),
+	        new Tuple<int, int>(609, 129), //56
+	        new Tuple<int, int>(405, 1033), //57
+	        new Tuple<int, int>(569, 1009),
+	        new Tuple<int, int>(673, 969),
+	        new Tuple<int, int>(709, 809),
+	        new Tuple<int, int>(673, 645),
+	        new Tuple<int, int>(669, 473),
+	        new Tuple<int, int>(705, 317),
+	        new Tuple<int, int>(785, 213), //64
+	        new Tuple<int, int>(993, 201),
+	        new Tuple<int, int>(1085, 393),
+	        new Tuple<int, int>(1109, 549),
+	        new Tuple<int, int>(1197, 661),
+	        new Tuple<int, int>(1385, 629),
+	        new Tuple<int, int>(1521, 629), //70
+	        new Tuple<int, int>(1693, 621),
+	        new Tuple<int, int>(1837, 525),
+	        new Tuple<int, int>(1989, 421), //73 TopLeft
+	        new Tuple<int, int>(1945, 273), //74 TopRight
+	        new Tuple<int, int>(2169, 285),
+	        new Tuple<int, int>(2301, 445),
+	        new Tuple<int, int>(2281, 649),
+	        new Tuple<int, int>(2345, 861),
+	        new Tuple<int, int>(2285, 1017),
+	        new Tuple<int, int>(2365, 1177), //80
+	        new Tuple<int, int>(2325, 1329),
+	        new Tuple<int, int>(2349, 1525),
+	        new Tuple<int, int>(2185, 1541),
+	        new Tuple<int, int>(2009, 1521),
+	        new Tuple<int, int>(1837, 1505),
+	        new Tuple<int, int>(1681, 1529), //86
+	        new Tuple<int, int>(1497, 1501), //87
+	        new Tuple<int, int>(1337, 1517),
+	        new Tuple<int, int>(1169, 1497),
+	        new Tuple<int, int>(1001, 1481),
+	        new Tuple<int, int>(853, 1473),
+	        new Tuple<int, int>(721, 1469),
+	        new Tuple<int, int>(745, 1369), //93
+	        new Tuple<int, int>(1589, 1329), //94
+	        new Tuple<int, int>(1465, 1329),
+	        new Tuple<int, int>(1297, 1301),
+	        new Tuple<int, int>(1153, 1305),
+	        new Tuple<int, int>(937, 1313), //98
+	        new Tuple<int, int>(917, 1109),
+	        new Tuple<int, int>(1105, 1109), //100
+	        new Tuple<int, int>(1245, 1101),
+	        new Tuple<int, int>(1393, 1101),
+	        new Tuple<int, int>(1541, 1121),
+	        new Tuple<int, int>(1721, 1173),
+	        new Tuple<int, int>(1693, 981),
+	        new Tuple<int, int>(1761, 829),
+	        new Tuple<int, int>(1929, 825),
+	        new Tuple<int, int>(1897, 1029),
+	        new Tuple<int, int>(1969, 1105),
+	        new Tuple<int, int>(2069, 1093), //110
+	        new Tuple<int, int>(2165, 961),
+	        new Tuple<int, int>(2117, 829),
+	        new Tuple<int, int>(1969, 669),
+	        new Tuple<int, int>(1865, 497),
+	        new Tuple<int, int>(1573, 397),
+	        new Tuple<int, int>(1493, 169),
+	        new Tuple<int, int>(1285, 129),
+	        new Tuple<int, int>(1145, 129),
+	        new Tuple<int, int>(981, 137),
+	        new Tuple<int, int>(821, 169), //120 TopRight
+	        new Tuple<int, int>(933, 325), //121 TopLeft
+	        new Tuple<int, int>(841, 545),
+	        new Tuple<int, int>(845, 741),
+	        new Tuple<int, int>(849, 905),
+	        new Tuple<int, int>(861, 1185),
+	        new Tuple<int, int>(625, 1181),
+	        new Tuple<int, int>(449, 1265),
+	        new Tuple<int, int>(469, 1381),
+	        new Tuple<int, int>(617, 1377),
+	        new Tuple<int, int>(781, 1457), //130 TopLeft
+	        new Tuple<int, int>(949, 141), //131 BottomLeft
+	        new Tuple<int, int>(885, 281),
+	        new Tuple<int, int>(725, 301),
+	        new Tuple<int, int>(521, 321),
+	        new Tuple<int, int>(329, 257),
+	        new Tuple<int, int>(153, 349),
+	        new Tuple<int, int>(229, 577),
+	        new Tuple<int, int>(117, 741),
+	        new Tuple<int, int>(149, 917),
+	        new Tuple<int, int>(129, 1101), //140
+	        new Tuple<int, int>(121, 1285),
+	        new Tuple<int, int>(125, 1461),
+	        new Tuple<int, int>(173, 1701),
+	        new Tuple<int, int>(409, 1705),
+	        new Tuple<int, int>(585, 1613),
+	        new Tuple<int, int>(621, 1353),
+	        new Tuple<int, int>(357, 1377),
+	        new Tuple<int, int>(373, 1149),
+	        new Tuple<int, int>(617, 1117), //149
+	        new Tuple<int, int>(485, 933), //150
+	        new Tuple<int, int>(945, 1149) //151 BottomLeft
         };
         #endregion
 
@@ -369,7 +374,7 @@ namespace GameOfLife
             graphics.PreferredBackBufferWidth = 956;
             graphics.ApplyChanges();
 
-            output = new Output.GameOfLifeOutput();
+            output = "";
 
             Content.RootDirectory = "Content";
         }
@@ -396,6 +401,8 @@ namespace GameOfLife
 
             gameEnded = true;
             elapsedSinceMoving = 0;
+            waiting = false;
+            waitTime = 0;
             
             stepsLeft = 0;
             numberSpun = 0;
@@ -450,6 +457,7 @@ namespace GameOfLife
             houseImg = Content.Load<Texture2D>("house");
             collegeImg = Content.Load<Texture2D>("college");
             careerImg = Content.Load<Texture2D>("career");
+            salaryImg = Content.Load<Texture2D>("salary");
 
             stock1 = Content.Load<Texture2D>("stock_1");
             stock2 = Content.Load<Texture2D>("stock_2");
@@ -478,7 +486,7 @@ namespace GameOfLife
             career5 = Content.Load<Texture2D>("career5");
             career6 = Content.Load<Texture2D>("career6");
             career7 = Content.Load<Texture2D>("career7");
-            career8 = Content.Load<Texture2D>("career8");            
+            career8 = Content.Load<Texture2D>("career8");
             careers[0] = career0;
             careers[1] = career1;
             careers[2] = career2;
@@ -531,7 +539,10 @@ namespace GameOfLife
             titleFont = Content.Load<SpriteFont>("Instructions_title");
 
             palya2 = Content.Load<Texture2D>("palya3");
-            fullBoard = Content.Load<Texture2D>("fullBoard");
+            boardTopLeft = Content.Load<Texture2D>("boardTopLeft");
+            boardTopRight = Content.Load<Texture2D>("boardTopRight");
+            boardBottomLeft = Content.Load<Texture2D>("boardBottomLeft");
+            boardBottomRight = Content.Load<Texture2D>("boardBottomRight");
 
             piece1 = Content.Load<Texture2D>("player1");
             piece2 = Content.Load<Texture2D>("player2");
@@ -577,9 +588,27 @@ namespace GameOfLife
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            //TODO modellbe: ha valaki nem egyetemista, ne kapjon egyetemista munkát
-            //TODO Drawba:   részvény megjelenítése, ha vett egyet
             newKeyboardState = Keyboard.GetState();
+
+            if (waiting)
+            {
+                if (waitTime <= 0)
+                {
+                    waiting = false;
+                    waitTime = 0;
+                }
+                else
+                {
+                    waitTime -= (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+                    if (waitTime > 0)
+                    {
+                        oldKeyboardState = newKeyboardState;
+                        //output Update
+                        base.Update(gameTime);
+                        return;
+                    }
+                }
+            }
 
             switch (gameState)
             {
@@ -614,7 +643,18 @@ namespace GameOfLife
                                 break;
 
                             case 1: //Betöltés
-                                //TODO Load game
+                                System.Windows.Forms.OpenFileDialog dialog = new System.Windows.Forms.OpenFileDialog();
+                                dialog.Filter = "Élet játéka mentés fájl (*.xml)|*.xml";
+                                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                                {
+                                    model = new DataModel.DataModel(dialog.FileName);
+                                    computer = new ComputerAI.ComputerAI(model);
+                                    stepsLeft = 0;
+                                    numberSpun = 0;
+                                    arrowPosition = 0;
+                                    gameEnded = false;
+                                    gameState = State.PLAYERSTURN;
+                                }
                                 break;
 
                             case 2: //Játékszabályok
@@ -622,7 +662,6 @@ namespace GameOfLife
                                 break;
 
                             default: //Kilépés
-                                //TODO "Are you sure?..."
                                 this.Exit();
                                 break;
 
@@ -725,6 +764,11 @@ namespace GameOfLife
                         !model.IsRetired(model.ActualPlayer) &&
                         !model.PlayerLoseNextRound(model.ActualPlayer))
                     {
+                        if (model.PlayerPc(model.ActualPlayer) && !waiting && waitTime <= 0)
+                        {
+                            startWaiting(1000);
+                        }
+
                         //"Fel" lekezelése - következõ menüpontra mutat a kurzor. De csak akkor, ha nem gép köre van
                         if (oldKeyboardState.IsKeyUp(Keys.Up) && newKeyboardState.IsKeyDown(Keys.Up) && !model.PlayerPc(model.ActualPlayer))
                         {
@@ -786,31 +830,31 @@ namespace GameOfLife
                         //Vagy ha gép köre van, akkor az elõbb meghozott döntést aktiváljuk
                         if ((oldKeyboardState.IsKeyUp(Keys.Space) && newKeyboardState.IsKeyDown(Keys.Space) && !model.PlayerPc(model.ActualPlayer)) ||
                             (oldKeyboardState.IsKeyUp(Keys.Enter) && newKeyboardState.IsKeyDown(Keys.Enter) && !model.PlayerPc(model.ActualPlayer)) ||
-                            model.PlayerPc(model.ActualPlayer))
+                            model.PlayerPc(model.ActualPlayer) && waiting && waitTime <= 0)
                         {
                             switch (arrowPosition)
                             {
                                 case 1: //Otthonbiztosítás vásárlása
                                     if (model.BuyHouseInsurance(model.ActualPlayer))
                                     {
-                                        output.Write("Megvetted az lakásbiztosítást.");
+                                        output = "Megvetted az lakásbiztosítást.";
                                         arrowPosition = 0;
                                     }
                                     else
                                     {
-                                        output.Write("Nincs elég pénzed lakásbiztosításra!");
+                                        output = "Nincs elég pénzed lakásbiztosításra!";
                                     }
                                     break;
 
                                 case 2: //Gépjármûbiztosítás vásárlása
                                     if (model.BuyCarInsurance(model.ActualPlayer))
                                     {
-                                        output.Write("Megvetted a gépjármûbiztosítást.");
+                                        output = "Megvetted a gépjármûbiztosítást.";
                                         arrowPosition = 0;
                                     }
                                     else
                                     {
-                                        output.Write("Nincs elég pénzed gépjármûbiztosításra!");
+                                        output = "Nincs elég pénzed gépjármûbiztosításra!";
                                     }
                                     break;
 
@@ -822,7 +866,7 @@ namespace GameOfLife
                                 case 4: //Hitel visszafizetése
                                     if (model.PayBackLoan(model.ActualPlayer,25000))
                                     {
-                                        output.Write("Visszafizettél egy kölcsönt. ($25000)");
+                                        output = "Visszafizettél egy kölcsönt. ($25000)";
                                         if (model.PlayerLoan(model.ActualPlayer) == 0)
                                         {
                                             arrowPosition = 0;
@@ -830,12 +874,17 @@ namespace GameOfLife
                                     }
                                     else
                                     {
-                                        output.Write("Nincs elég pénzed visszafizetni a kölcsönt!");
+                                        output = "Nincs elég pénzed visszafizetni a kölcsönt!";
                                     }
                                     break;
 
                                 case 5: //Mentés
-                                    //TODO mentés
+                                    System.Windows.Forms.SaveFileDialog dialog = new System.Windows.Forms.SaveFileDialog();
+                                    dialog.Filter = "Élet játéka mentés fájl (*.xml)|*.xml";
+                                    if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                                    {
+                                        model.Save(dialog.FileName, true);
+                                    }
                                     break;
 
                                 case 6: //Kilépés
@@ -855,13 +904,13 @@ namespace GameOfLife
                         if (model.PlayerLocation(model.ActualPlayer) == 0)
                         {
                             gameState = State.COLLEGEORCAREER;
-                            output.ConstantText("Egyetem (1-es gomb) vagy karrier (2-es gomb)?");
+                            output = "Egyetem (1-es gomb) vagy karrier (2-es gomb)?"; //ConstantText
                         }
 
                         //Ha a játékos kimarad egy körbõl
                         if (model.PlayerLoseNextRound(model.ActualPlayer))
                         {
-                            output.Write(model.PlayerName(model.ActualPlayer) + " kimarad egy körbõl!");
+                            output = model.PlayerName(model.ActualPlayer) + " kimarad egy körbõl!";
                             model.SetLoseNextRound(model.ActualPlayer, false);
                             EndTurn();
                         }
@@ -877,168 +926,228 @@ namespace GameOfLife
 
                 #region Update: COLLEGEORCAREER
                 case State.COLLEGEORCAREER:
+
+                    if (model.PlayerPc(model.ActualPlayer) && !waiting && waitTime <= 0)
+                    {
+                        startWaiting(1000);
+                    }
+
                     //"1" lekezelése, ha nem gép köre van - a játékos az egyetemet választotta
                     //Ha gép köre van, és "1"-et mondott, akkor lekezeljük
                     if ((oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1) && !model.PlayerPc(model.ActualPlayer)) ||
-                        (model.PlayerPc(model.ActualPlayer) && computer.firstFork() == Keys.D1) )
+                        (model.PlayerPc(model.ActualPlayer) && computer.firstFork() == Keys.D1 && waiting && waitTime <= 0))
                     {
-                        model.SetPlayerLocation(model.ActualPlayer,1);
+                        model.SetPlayerLocation(model.ActualPlayer, 1);
                         model.GetStudentLoan(model.ActualPlayer);
 
                         gameState = State.PLAYERSTURN;
-                        output.RemoveConstantText();
+                        output = ""; //RemoveConstantText
                     }
                     //"2" lekezelése, ha nem gép köre van - a játékos a karriert választotta
                     //Ha gép köre van, és "2"-t mondott, akkor lekezeljük
                     if ((oldKeyboardState.IsKeyUp(Keys.D2) && newKeyboardState.IsKeyDown(Keys.D2) && !model.PlayerPc(model.ActualPlayer)) ||
-                        (model.PlayerPc(model.ActualPlayer) && computer.firstFork() == Keys.D2) )
+                        (model.PlayerPc(model.ActualPlayer) && computer.firstFork() == Keys.D2 && waiting && waitTime <= 0))
                     {
-                        model.SetPlayerLocation(model.ActualPlayer,13);
+                        model.SetPlayerLocation(model.ActualPlayer, 13);
                         model.GiveCareer(model.ActualPlayer);
                         model.GiveSalary(model.ActualPlayer);
 
                         gameState = State.PLAYERSTURN;
-                        output.RemoveConstantText();
-                    }
+                        output = ""; //RemoveConstantText
+                        }
                     break;
                 #endregion
 
                 #region Update: MOVING
                 case State.MOVING:
-                    //Az 50. mezõ után elágazás következik
-                    if (model.PlayerLocation(model.ActualPlayer) == 50)
+
+                    if (!waiting && waitTime <= 0)
                     {
-                        gameState = State.ATFORK1;
-                        output.ConstantText("Merre mész tovább? (1,2)");
-                    }
-                    //A  86. mezõ után elágazás következik
-                    if (model.PlayerLocation(model.ActualPlayer) == 86)
-                    {
-                        gameState = State.ATFORK2;
-                        output.ConstantText("Merre mész tovább? (1,2)");
+                        //Az 50. mezõ után elágazás következik
+                        if (model.PlayerLocation(model.ActualPlayer) == 50)
+                        {
+                            gameState = State.ATFORK1;
+                            output = "Merre mész tovább? (1,2)"; //ConstantText
+                        }
+                        //A  86. mezõ után elágazás következik
+                        if (model.PlayerLocation(model.ActualPlayer) == 86)
+                        {
+                            gameState = State.ATFORK2;
+                            output = "Merre mész tovább? (1,2)"; //ConstantText
+                        }
+
+                        if (gameState == State.MOVING && stepsLeft > 0)
+                        {
+                            elapsedSinceMoving += gameTime.ElapsedGameTime.TotalMilliseconds;
+                            if (elapsedSinceMoving >= 1000) //Ha az utolsó lépés óta eltelt legalább 1 másodperc, lépünk
+                            {
+                                stepForward();
+                                elapsedSinceMoving = 0;
+                            }
+                        }
+                        //Ha elfogyott a lépésünk, aktiválódik a mezõ hatása
+                        if (gameState == State.MOVING && stepsLeft == 0)
+                        {
+                            EffectOfField(model.PlayerLocation(model.ActualPlayer));
+                            if (gameState == State.MOVING && stepsLeft == 0)
+                            {
+                                startWaiting(2500);
+                            }
+                        }
                     }
 
-                    if (gameState == State.MOVING && stepsLeft != 0)
+                    if (waiting && waitTime <= 0)
                     {
-                        elapsedSinceMoving += gameTime.ElapsedGameTime.TotalMilliseconds;
-                        if (elapsedSinceMoving >= 1000) //Ha az utolsó lépés óta eltelt legalább 1 másodperc, lépünk
-                        {
-                            stepForward();
-                            elapsedSinceMoving = 0;
-                        }
-                        
-                    }
-                    //Ha elfogyott a lépésünk, aktiválódik a mezõ hatása
-                    if (gameState == State.MOVING && stepsLeft == 0)
-                    {
-                        EffectOfField(model.PlayerLocation(model.ActualPlayer));
                         //Ha az EffectOfField nem módosította a játék állapotát, sem a hátralévõ lépések számát, akkor vége a körnek
                         if (gameState == State.MOVING && stepsLeft == 0)
                         {
                             EndTurn();
                         }
                     }
+
                     break;
                 #endregion
 
                 #region Update: ATFORK1
                 case State.ATFORK1:
+                    if (model.PlayerPc(model.ActualPlayer) && !waiting && waitTime <= 0)
+                    {
+                        startWaiting(1000);
+                    }
+
                     //"1" lekezelése, ha nem gép köre van - a játékost elõre léptetjük eggyel az 1. útvonalon
                     //Ha gép köre van, és "1"-et mondott, lekezeljük
                     if ((oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1) && !model.PlayerPc(model.ActualPlayer)) ||
-                        (model.PlayerPc(model.ActualPlayer) && computer.atFork1() == Keys.D1))
+                        (model.PlayerPc(model.ActualPlayer) && computer.atFork1() == Keys.D1 && waiting && waitTime <= 0))
                     {
                         model.SetPlayerLocation(model.ActualPlayer, 51);
                         --stepsLeft;
                         gameState = State.MOVING;
-                        output.RemoveConstantText();
+                        output = ""; //RemoveConstantText
                     }
                     //"2" lekezelése, ha nem gép köre van - a játékost elõre léptetjük eggyel az 2. útvonalon
                     //Ha gép köre van, és "2"-t mondott, lekezeljük
                     if ((oldKeyboardState.IsKeyUp(Keys.D2) && newKeyboardState.IsKeyDown(Keys.D2) && !model.PlayerPc(model.ActualPlayer)) ||
-                        (model.PlayerPc(model.ActualPlayer) && computer.atFork1() == Keys.D2))
+                        (model.PlayerPc(model.ActualPlayer) && computer.atFork1() == Keys.D2 && waiting && waitTime <= 0))
                     {
                         model.SetPlayerLocation(model.ActualPlayer, 57);
                         --stepsLeft;
                         gameState = State.MOVING;
-                        output.RemoveConstantText();
+                        output = ""; //RemoveConstantText
                     }
                     break;
                 #endregion
 
                 #region Update: ATFORK2
                 case State.ATFORK2:
+                    if (model.PlayerPc(model.ActualPlayer) && !waiting && waitTime <= 0)
+                    {
+                        startWaiting(1000);
+                    }
                     //"1" lekezelése, ha nem gép köre van - a játékost elõre léptetjük eggyel az 1. útvonalon
                     //Ha gép köre van, és "1"-et mondott, lekezeljük
                     if ((oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1) && !model.PlayerPc(model.ActualPlayer)) ||
-                        (model.PlayerPc(model.ActualPlayer) && computer.atFork2() == Keys.D1))
+                        (model.PlayerPc(model.ActualPlayer) && computer.atFork2() == Keys.D1 && waiting && waitTime <= 0))
                     {
                         model.SetPlayerLocation(model.ActualPlayer, 87);
                         --stepsLeft;
                         gameState = State.MOVING;
-                        output.RemoveConstantText();
+                        output = ""; //RemoveConstantText
                     }
                     //"2" lekezelése, ha nem gép köre van - a játékost elõre léptetjük eggyel a 2. útvonalon
                     //Ha gép köre van, és "2"-t mondott, lekezeljük
                     if ((oldKeyboardState.IsKeyUp(Keys.D2) && newKeyboardState.IsKeyDown(Keys.D2) && !model.PlayerPc(model.ActualPlayer)) ||
-                        (model.PlayerPc(model.ActualPlayer) && computer.atFork2() == Keys.D2))
+                        (model.PlayerPc(model.ActualPlayer) && computer.atFork2() == Keys.D2 && waiting && waitTime <= 0))
                     {
                         model.SetPlayerLocation(model.ActualPlayer, 94);
                         --stepsLeft;
                         gameState = State.MOVING;
-                        output.RemoveConstantText();
+                        output = ""; //RemoveConstantText
                     }
                     break;
                 #endregion
 
                 #region Update: CHOOSERETIREMENT
                 case State.CHOOSERETIREMENT:
-                    //Ha vége van a játéknak, akkor is ebben az állapotban vagyunk! Csak ilyenkor a gameEnded nem engedi hogy az enteren kívül bármit is nyomjunk
+                    if (model.PlayerPc(model.ActualPlayer) && !gameEnded && !waiting && waitTime <= 0)
+                    {
+                        startWaiting(1000);
+                    }
 
                     //"1" lekezelése, ha nem gép köre van - a játékos a vidéki házba megy nyugdíjba
                     //Ha gép köre van, és "1"-et mondott, lekezeljük
                     if (!gameEnded &&
                         ((oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1) && !model.PlayerPc(model.ActualPlayer)) ||
-                        (model.PlayerPc(model.ActualPlayer) && computer.selectRetire() == Keys.D1)))
+                        (model.PlayerPc(model.ActualPlayer) && computer.selectRetire() == Keys.D1 && waiting && waitTime <= 0)))
                     {
-                        model.SetPlayerLocation(model.ActualPlayer, 151);
+                        model.SetPlayerLocation(model.ActualPlayer, 150);
                         model.Retire(model.ActualPlayer, false);
 
-                        //Ha mindenki nyugdíjba ment, kiszámoljuk a gyõztest, és befejezõdik a játék
+                        //Ha mindenki nyugdíjba ment, megnézzük, ki kapja a bónusz életkártyákat, és elkezdõdik az életkártyák felfordítása
                         if (model.IsEveryoneRetired)
                         {
-                            int winner = model.EndGame()[0];
-                            output.ConstantText(model.PlayerName(winner) + " nyert!");
-                            gameEnded = true;
+                                model.CalculateWinnerOfVillaPrize();
+                                model.ActualPlayer = 0;
+                                output = "";
+                                gameState = State.GIVINGAWARDS;
                         }
                         else
                         {
                             EndTurn(); //Ha még nem ment mindenki nyugdíjba, akkor jön a következõ játékos
                         }
                     }
-                    //"1" lekezelése, ha nem gép köre van - a játékos a milliomosok nyaralójába megy nyugdíjba
+                    //"2" lekezelése, ha nem gép köre van - a játékos a milliomosok nyaralójába megy nyugdíjba
                     //Ha gép köre van, és "2"-t mondott, lekezeljük
                     if (!gameEnded &&
                         ((oldKeyboardState.IsKeyUp(Keys.D2) && newKeyboardState.IsKeyDown(Keys.D2) && !model.PlayerPc(model.ActualPlayer)) ||
-                        (model.PlayerPc(model.ActualPlayer) && computer.selectRetire() == Keys.D2)))
+                        (model.PlayerPc(model.ActualPlayer) && computer.selectRetire() == Keys.D2) && waiting && waitTime <= 0))
                     {
-                        model.SetPlayerLocation(model.ActualPlayer, 150);
+                        model.SetPlayerLocation(model.ActualPlayer, 151);
                         model.Retire(model.ActualPlayer, true);
 
-                        //Ha mindenki nyugdíjba ment, kiszámoljuk a gyõztest, és befejezõdik a játék
+                        //Ha mindenki nyugdíjba ment, megnézzük, ki kapja a bónusz életkártyákat, és elkezdõdik az életkártyák felfordítása
                         if (model.IsEveryoneRetired)
                         {
-                            int winner = model.EndGame()[0];
-                            output.ConstantText(model.PlayerName(winner) + " nyert!");
-                            gameEnded = true;
+                                model.CalculateWinnerOfVillaPrize();
+                                model.ActualPlayer = 0;
+                                output = "";
+                                gameState = State.GIVINGAWARDS;
                         }
                         else
                         {
                             EndTurn(); //Ha még nem ment mindenki nyugdíjba, akkor jön a következõ játékos
                         }
                     }
+                    break;
+                #endregion
 
-                    //Ha vége van a játéknak, már csak egy enterre várunk, majd visszamegyünk a fõmenübe
+                #region Update: GIVINGAWARDS
+                case State.GIVINGAWARDS:
+                    //Ha vége van a játéknak, akkor is ebben az állapotban vagyunk! Csak ilyenkor a gameEnded nem engedi hogy az enteren kívül bármit is nyomjunk
+                    if (output == "" && !gameEnded)
+                    {
+                        Tuple<String, Int32> lifeCard = model.RevealLifeCard(model.ActualPlayer);
+                        String award = lifeCard.Item1;
+                        Int32 prizeMoney = lifeCard.Item2;
+                        output = award + " ( +$" + prizeMoney + " )";
+                    }
+
+                    if (oldKeyboardState.IsKeyUp(Keys.Space) && newKeyboardState.IsKeyDown(Keys.Space) && !gameEnded)
+                    {
+                        output = "";
+                        if (model.PlayerLifeCardNumber(model.ActualPlayer) <= 0)
+                        {
+                            model.NextPlayer();
+                            if (model.ActualPlayer == 0)
+                            {
+                                int winner = model.EndGame()[0];
+                                output = model.PlayerName(winner) + " nyert!"; //ConstantText
+                                model.ActualPlayer = winner;
+                                gameEnded = true;
+                            }
+                        }
+                    }
+
                     if (oldKeyboardState.IsKeyUp(Keys.Enter) && newKeyboardState.IsKeyDown(Keys.Enter) && gameEnded)
                     {
                         arrowPosition = 0;
@@ -1056,6 +1165,11 @@ namespace GameOfLife
                      * 8 -> a  9. részvényt választotta
                      * 9 -> még nem választott
                      */
+
+                    if (model.PlayerPc(model.ActualPlayer) && !waiting && waitTime <= 0)
+                    {
+                        startWaiting(1000);
+                    }
 
                     //"1" lekezelése, ha nem gép köre van - 1. részvényt választotta, ha az még szabad
                     if ((oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1) && !model.PlayerPc(model.ActualPlayer)) &&
@@ -1105,7 +1219,7 @@ namespace GameOfLife
                     }
 
                     //Ha gép köre van, akkor a gép választ
-                    if (model.PlayerPc(model.ActualPlayer))
+                    if (model.PlayerPc(model.ActualPlayer) && waiting && waitTime <= 0)
                     {
                         arrowPosition = computer.buyStock();
                     }
@@ -1115,13 +1229,13 @@ namespace GameOfLife
                     {
                         if (model.BuyStock(model.ActualPlayer, arrowPosition))
                         {
-                            output.Write("Sikeresen megvásároltad a " + (arrowPosition + 1) + ". részvényt.");
+                            output = "Sikeresen megvásároltad a " + (arrowPosition + 1) + ". részvényt.";
                             arrowPosition = 0;
                             gameState = State.PLAYERSTURN;
                         }
                         else
                         {
-                            output.Write("Nincs elég pénzed részvényt vásárolni!");
+                            output = "Nincs elég pénzed részvényt vásárolni!";
                             arrowPosition = 3;
                             gameState = State.PLAYERSTURN;
                         }
@@ -1138,6 +1252,11 @@ namespace GameOfLife
                      * 3 -> még nem választott
                      */
 
+                    if (model.PlayerPc(model.ActualPlayer) && !waiting && waitTime <= 0)
+                    {
+                        startWaiting(1000);
+                    }
+
                     if (oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1) && !model.PlayerPc(model.ActualPlayer))
                     {
                         arrowPosition = 0;
@@ -1152,33 +1271,40 @@ namespace GameOfLife
                     }
 
                     //Ha gép köre van, õ dönt
-                    if (model.PlayerPc(model.ActualPlayer))
+                    if (model.PlayerPc(model.ActualPlayer) && waiting && waitTime <= 0)
                     {
                         arrowPosition = computer.selectJob(threeCareers);
                     }
 
                     if (arrowPosition != 3)
                     {
-                        //Beállítjuk a kiválasztott karriert
-                        model.SetCareer(model.ActualPlayer, threeCareers[arrowPosition]);
-
-                        //Beállítjuk a három fizetést, amit a munka kiválasztása után fogunk felkínálni
-                        threeSalaries = model.GiveThreeSalary();
-
-                        /*
-                        //Ha a játékos egy kék mezõ segítségével érte el a munkaváltást (azaz nem most végzett az egyetemen), akkor az elsõ fizetés az eddigi fizetése
-                        if (model.PlayerLocation(model.ActualPlayer) != 12)
+                        //Ellenõrizzük, hogy a játékos olyat választott-e, amit választhat (nem diplomás játékos nem választhat diplomát igénylõ állást)
+                        if (!model.PlayerDegree(model.ActualPlayer) && threeCareers[arrowPosition] >= 6)
                         {
-                            threeSalaries[0] = model.PlayerSalary(model.ActualPlayer);
+                            arrowPosition = 3;
                         }
-                        */
+                        else
+                        {
+                            //Beállítjuk a kiválasztott karriert
+                            model.SetCareer(model.ActualPlayer, threeCareers[arrowPosition]);
 
-                        Console.WriteLine("A három fizetés: " + threeSalaries[0] + " " + threeSalaries[1] + " " + threeSalaries[2]);
+                            //Ha a játékos most végzett az egyetemen, akkor három új fizetést kap
+                            if (model.PlayerLocation(model.ActualPlayer) == 12)
+                            {
+                                threeSalaries = model.GiveThreeSalary();
+                            }
+                            else//Ha a játékos egy kék mezõ segítségével érte el a munkaváltást, akkor a három fizetés közül az elsõ az eddigi fizetése
+                            {
+                                threeSalaries = model.GiveThreeSalary(model.ActualPlayer);
+                            }
 
-                        //A karrier kiválasztása után következik a fizetés kiválasztása
-                        arrowPosition = 3;
-                        gameState = State.CHOOSESALARY;
-                        output.ConstantText("Válassz fizetést! (1,2,3)");
+                            Console.WriteLine("A három fizetés: " + threeSalaries[0] + " " + threeSalaries[1] + " " + threeSalaries[2]);
+
+                            //A karrier kiválasztása után következik a fizetés kiválasztása
+                            arrowPosition = 3;
+                            gameState = State.CHOOSESALARY;
+                            output = "Válassz fizetést! (1,2,3)"; //ConstantText
+                        }
                     }
 
                     break;
@@ -1193,6 +1319,11 @@ namespace GameOfLife
                      * 3 -> még nem választott
                      */
 
+                    if (model.PlayerPc(model.ActualPlayer) && !waiting && waitTime <= 0)
+                    {
+                        startWaiting(1000);
+                    }
+
                     if (oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1) && !model.PlayerPc(model.ActualPlayer))
                     {
                         arrowPosition = 0;
@@ -1207,7 +1338,7 @@ namespace GameOfLife
                     }
 
                     //Ha gép köre van, õ dönt
-                    if (model.PlayerPc(model.ActualPlayer))
+                    if (model.PlayerPc(model.ActualPlayer) && waiting && waitTime <= 0)
                     {
                         arrowPosition = computer.selectSalary(threeSalaries);
                     }
@@ -1220,8 +1351,8 @@ namespace GameOfLife
                         //Ha a játékos most végzett az egyetemen, újra pörgethet
                         if (model.PlayerLocation(model.ActualPlayer) == 12)
                         {
-                            output.RemoveConstantText();
-                            output.Write(model.PlayerName(model.ActualPlayer) + " lediplomázott.");
+                            //output RemoveConstantText
+                            output = model.PlayerName(model.ActualPlayer) + " lediplomázott.";
                             spin();
                         }
                         else
@@ -1236,28 +1367,32 @@ namespace GameOfLife
                 #region Update: CHANGEJOB
                 case State.CHANGEJOB:
 
+                    if (model.PlayerPc(model.ActualPlayer) && !waiting && waitTime <= 0)
+                    {
+                        startWaiting(1000);
+                    }
+
                     //"I" lekezelése, ha nem gép köre van - elkezdjük a munkaváltást
                     //Ha gép köre van, és szeretne munkát váltani, lekezeljük
                     if ((oldKeyboardState.IsKeyUp(Keys.I) && newKeyboardState.IsKeyDown(Keys.I) && !model.PlayerPc(model.ActualPlayer)) ||
-                        (model.PlayerPc(model.ActualPlayer) && computer.blueFieldChangeJob()))
+                        (model.PlayerPc(model.ActualPlayer) && waiting && waitTime <= 0 && computer.blueFieldChangeJob()))
                     {
                         //Fizetünk a tanárnak 20000-et
                         model.PayForSomeone(20000, model.ActualPlayer, 6);
 
                         //Kisorsoljuk a három állást, amelybõl az 1. az eddigi munkája
-                        threeCareers = model.GiveThreeCareer();
-                        threeCareers[0] = model.PlayerCareerCard(model.ActualPlayer);
+                        threeCareers = model.GiveThreeCareer(model.ActualPlayer);
 
                         Console.WriteLine("A három karrier: " + threeCareers[0] + " " + threeCareers[1] + " " + threeCareers[2]);
                         arrowPosition = 3; //== még nem választott
                         gameState = State.CHOOSEJOB;
-                        output.ConstantText("Válassz! (1,2,3)");
+                        output = "Válassz! (1,2,3)"; //ConstantText
                     }
 
                     //"N" lekezelése, ha nem gép köre van - vége van a körnek
                     //Ha gép köre van, és nem szeretne munkát váltani, lekezeljük
                     if ((oldKeyboardState.IsKeyUp(Keys.N) && newKeyboardState.IsKeyDown(Keys.N) && !model.PlayerPc(model.ActualPlayer)) ||
-                        (model.PlayerPc(model.ActualPlayer) && !computer.blueFieldChangeJob()))
+                        (model.PlayerPc(model.ActualPlayer) && waiting && waitTime <= 0 && !computer.blueFieldChangeJob()))
                     {
                         EndTurn();
                     }
@@ -1267,10 +1402,15 @@ namespace GameOfLife
                 #region Update: TRADESALARY
                 case State.TRADESALARY:
 
+                    if (model.PlayerPc(model.ActualPlayer) && !waiting && waitTime <= 0)
+                    {
+                        startWaiting(1000);
+                    }
+
                     //"I" lekezelése, ha nem gép köre van - elkezdjük a cserét
                     //Ha gép köre van, és szeretne cserélni, lekezeljük
                     if ((oldKeyboardState.IsKeyUp(Keys.I) && newKeyboardState.IsKeyDown(Keys.I) && !model.PlayerPc(model.ActualPlayer)) ||
-                        (model.PlayerPc(model.ActualPlayer) && computer.blueFieldTradeSalary()))
+                        (model.PlayerPc(model.ActualPlayer) && waiting && waitTime <= 0 && computer.blueFieldTradeSalary()))
                     {
                         arrowPosition = 6; //== még nem választott
                         gameState = State.TRADEWITHWHO;
@@ -1285,13 +1425,13 @@ namespace GameOfLife
                         }
                         listOfPlayersInAString.Remove(listOfPlayersInAString.Length - 2);
 
-                        output.ConstantText("Kivel cserélsz? (" + listOfPlayersInAString + ")");
+                        output = "Kivel cserélsz? (" + listOfPlayersInAString + ")"; //ConstantText
                     }
 
                     //"N" lekezelése, ha nem gép köre van - vége van a körnek
                     //Ha gép köre van, és nem szeretne cserélni, lekezeljük
                     if ((oldKeyboardState.IsKeyUp(Keys.N) && newKeyboardState.IsKeyDown(Keys.N) && !model.PlayerPc(model.ActualPlayer)) ||
-                        (model.PlayerPc(model.ActualPlayer) && !computer.blueFieldTradeSalary()))
+                        (model.PlayerPc(model.ActualPlayer) && waiting && waitTime <= 0 && !computer.blueFieldTradeSalary()))
                     {
                         EndTurn();
                     }
@@ -1307,6 +1447,11 @@ namespace GameOfLife
                      * 5 -> a  6. játékost választotta
                      * 6 -> még nem választott
                      */
+
+                    if (model.PlayerPc(model.ActualPlayer) && !waiting && waitTime <= 0)
+                    {
+                        startWaiting(1000);
+                    }
 
                     //"1" lekezelése, ha nem gép köre van, és létezik a kiválasztott játékos, és nem önmagát választotta - az 1. játékost választotta
                     if ((oldKeyboardState.IsKeyUp(Keys.D1) && newKeyboardState.IsKeyDown(Keys.D1) && !model.PlayerPc(model.ActualPlayer)) &&
@@ -1347,7 +1492,7 @@ namespace GameOfLife
                     }
 
                     //Ha gép köre van, õ dönt
-                    if (model.PlayerPc(model.ActualPlayer))
+                    if (model.PlayerPc(model.ActualPlayer) && waiting && waitTime <= 0)
                     {
                         arrowPosition = computer.tradeSalary();
                     }
@@ -1364,7 +1509,7 @@ namespace GameOfLife
             }//switch (gameState)
 
             oldKeyboardState = newKeyboardState;
-            output.Update(gameTime.ElapsedGameTime.TotalMilliseconds);
+            //output Update
             base.Update(gameTime);
         }
 
@@ -1382,11 +1527,11 @@ namespace GameOfLife
             {
                 if (spinResult.Item1 == 10)
                 {
-                    output.Write("Gyorshajtás! " + model.PlayerName(model.ActualPlayer) + " fizet $10.000-et " + model.PlayerName(spinResult.Item2) + "nak.");
+                    output = "Gyorshajtás! " + model.PlayerName(model.ActualPlayer) + " fizet $10.000-et " + model.PlayerName(spinResult.Item2) + "nak.";
                 }
                 else
                 {
-                    output.Write(model.PlayerName(spinResult.Item2) + " kap $10.000-et a részvénye miatt.");
+                    output = model.PlayerName(spinResult.Item2) + " kap $10.000-et a részvénye miatt.";
                 }
             }
 
@@ -1445,7 +1590,7 @@ namespace GameOfLife
             if (locationsOfPayDays.Contains(model.PlayerLocation(model.ActualPlayer)))
             {
                 model.PayDay(model.ActualPlayer);
-                output.Write("Fizetésnap!");
+                output = "Fizetésnap!";
             }
 
         }
@@ -1456,7 +1601,6 @@ namespace GameOfLife
         /// </summary>
         private void EffectOfField(int fieldNumber)
         {
-            output.Write(model.PlayerName(model.ActualPlayer) + " a " + fieldNumber + " mezõre érkezett."); //TODO törölni!
             if (locationsOfLIFEs.Contains(fieldNumber))
             {
                 //TODO StealLifeCard
@@ -1487,12 +1631,13 @@ namespace GameOfLife
                     break;
 
                 case 12:
+                    model.TakeDegree(model.ActualPlayer);
                     threeCareers = model.GiveThreeCareer();
 
                     Console.WriteLine("A három karrier: " + threeCareers[0] + " " + threeCareers[1] + " " + threeCareers[2]);
                     arrowPosition = 3;
                     gameState = State.CHOOSEJOB;
-                    output.ConstantText("Válassz munkát! (1,2,3)");
+                    output = "Válassz munkát! (1,2,3)"; //ConstantText
                     break;
 
                 case 16:
@@ -1509,7 +1654,7 @@ namespace GameOfLife
                 case 27:
                     model.Marry(model.ActualPlayer);
                     model.GetLifeCard(model.ActualPlayer);
-                    output.Write(model.PlayerName(model.ActualPlayer) + " megházasodott.");
+                    output = model.PlayerName(model.ActualPlayer) + " megházasodott.";
                     spin();
                     break;
 
@@ -1534,7 +1679,7 @@ namespace GameOfLife
 
                 case 33:
                 case 70:
-                    output.ConstantText("Váltasz munkát? (I/N)");
+                    output = "Váltasz munkát? (I/N)"; //ConstantText
                     gameState = State.CHANGEJOB;
                     break;
 
@@ -1552,7 +1697,7 @@ namespace GameOfLife
 
                 case 38:
                     model.GiveHouse(model.ActualPlayer);
-                    output.Write(model.PlayerName(model.ActualPlayer) + " lakást vásárolt.");
+                    output = model.PlayerName(model.ActualPlayer) + " lakást vásárolt.";
                     spin();
                     break;
 
@@ -1624,7 +1769,7 @@ namespace GameOfLife
                 case 109:
                 case 122:
                 case 133:
-                    output.ConstantText("Elcseréled a fizetésed?");
+                    output = "Elcseréled a fizetésed?"; //ConstantText
                     gameState = State.TRADESALARY;
                     break;
 
@@ -1779,7 +1924,7 @@ namespace GameOfLife
 
                 case 149:
                     gameState = State.CHOOSERETIREMENT;
-                    output.ConstantText("Hova mész nyugdíjba? (1,2)");
+                    output = "Hova mész nyugdíjba? (1,2)"; //ConstantText
                     break;
 
 
@@ -1794,7 +1939,7 @@ namespace GameOfLife
             arrowPosition = 0;
             model.NextPlayer();
             gameState = State.PLAYERSTURN;
-            output.RemoveConstantText();
+            //output = ""; //RemoveConstantText
 
             #region Writing to console
 
@@ -1923,6 +2068,27 @@ namespace GameOfLife
             #endregion
         }
 
+        /// <summary>
+        /// Várakozni kezd
+        /// </summary>
+        private void startWaiting(float time)
+        {
+            if (!waiting)
+            {
+                waiting = true;
+                waitTime = time;
+            }
+        }
+
+        /// <summary>
+        /// Várakozás után kötelezõ meghívni
+        /// </summary>
+        private void stopWaiting()
+        {
+            waiting = false;
+            waitTime = 0;
+        }
+
         #endregion
         #region Draw
 
@@ -2005,12 +2171,16 @@ namespace GameOfLife
                 #region Draw: ATFORK1
                 case State.ATFORK1:
                     DrawUI();
+                    spriteBatch.DrawString(titleFont, "1", new Vector2(405, 139), Color.Black); //T.SZ.
+                    spriteBatch.DrawString(titleFont, "2", new Vector2(535, 189), Color.Black); //T.SZ.
                     break;
                 #endregion
 
                 #region Draw: ATFORK2
                 case State.ATFORK2:
                     DrawUI();
+                    spriteBatch.DrawString(titleFont, "1", new Vector2(265, 320), Color.Black); //T.SZ.
+                    spriteBatch.DrawString(titleFont, "2", new Vector2(355, 122), Color.Black); //T.SZ.
                     break;
                 #endregion
 
@@ -2032,6 +2202,14 @@ namespace GameOfLife
 
                 #region Draw: CHOOSERETIREMENT
                 case State.CHOOSERETIREMENT:
+                    DrawUI();
+                    spriteBatch.DrawString(titleFont, "1", new Vector2(213, 105), Color.Black); //T.SZ.
+                    spriteBatch.DrawString(titleFont, "2", new Vector2(820, 324), Color.Black); //T.SZ.
+                    break;
+                #endregion
+
+                #region Draw: GIVINGAWARDS
+                case State.GIVINGAWARDS: //T.SZ.
                     DrawUI();
                     break;
                 #endregion
@@ -2074,12 +2252,12 @@ namespace GameOfLife
                 #region Draw: MOVING
                 case State.MOVING:
                     DrawUI();
-                    spriteBatch.DrawString(titleFont, numberSpun.ToString(), new Vector2(240, 710), Color.White);
+                    spriteBatch.DrawString(titleFont, /*numberSpun*/stepsLeft.ToString(), new Vector2(240, 710), Color.White); //T.SZ.
                     break;
                 #endregion
 
                 #region Draw: PLAYERSTURN
-                case State.PLAYERSTURN: //T.SZ. TODO: jöhet a case MOVING. Oda is kell egy DrawUI(), meg valahogy kirajzolni a megfelelõ helyre a bábut
+                case State.PLAYERSTURN:
                     DrawUI();
 
                     int arrowX, arrowY;
@@ -2118,6 +2296,36 @@ namespace GameOfLife
             return new Rectangle(x, y, 956, 511);
         }
 
+        private Texture2D getBoardPart() //T.SZ.
+        {
+            if (model.PlayerLocation(model.ActualPlayer) <= 43)
+            {
+                return boardBottomRight;
+            }
+            else
+            {
+                if (model.PlayerLocation(model.ActualPlayer) <= 73)
+                {
+                    return boardTopLeft;
+                }
+                else
+                {
+                    if (model.PlayerLocation(model.ActualPlayer) <= 120)
+                    {
+                        return boardTopRight;
+                    }
+                    else
+                    {
+                        if (model.PlayerLocation(model.ActualPlayer) <= 130)
+                        {
+                            return boardTopLeft;
+                        }
+                    }
+                }
+            }
+            return boardBottomLeft;
+        }
+
         private void DrawUI() //T.SZ. kiemeltem a közös részt. A kurzor kirajzolása nincs benne
         {
             /* Ezt a függvényt a következõképp kell használni.
@@ -2127,22 +2335,29 @@ namespace GameOfLife
             */
             
             spriteBatch.Draw(palya2, new Rectangle(0, 0, 956, 835), Color.White);
-            spriteBatch.Draw(fullBoard, new Vector2(0, 64), getSourceRectangle(), Color.White);
+            spriteBatch.Draw(getBoardPart(), new Vector2(0, 64), getSourceRectangle(), Color.White); //T.SZ.
             spriteBatch.Draw(pieces[model.ActualPlayer], new Rectangle(478, 319, 30, 30), Color.White);
 
             spriteBatch.Draw(saveBtn, new Rectangle(660, 15, 105, 35), Color.White);
             spriteBatch.Draw(escapeBtn2, new Rectangle(820, 15, 105, 35), Color.White);
 
+            if (model.PlayerHouseCard(model.ActualPlayer) == 9) //T.SZ.
+            {
+                spriteBatch.Draw(houseImg, new Rectangle(771, 750, 57, 86), Color.White);
+            }
             // Ha a játékosnak van háza, és még nincs otthonbiztosítása...
             if (model.PlayerHouseCard(model.ActualPlayer) != 9 && (!model.PlayerHouseInsurance(model.ActualPlayer)))
             {
                 spriteBatch.Draw(buyHouseInsBtn, new Rectangle(343, 660, 143, 53), Color.White);
+                spriteBatch.Draw(houses[model.PlayerHouseCard(model.ActualPlayer)], new Rectangle(771, 750, 57, 86), Color.White); //T.SZ.
             }
             //Ha a játékosnak van otthonbiztosítása...
             else if (model.PlayerHouseInsurance(model.ActualPlayer))
-            {
-                spriteBatch.Draw(houseInsImg, new Rectangle(343, 660, 143, 53), Color.White);
-            }
+                {
+                    spriteBatch.Draw(houseInsImg, new Rectangle(343, 660, 143, 53), Color.White);
+                    spriteBatch.Draw(houses[model.PlayerHouseCard(model.ActualPlayer)], new Rectangle(771, 750, 57, 86), Color.White); //T.SZ.
+                }
+
             // Ha a játékosnak még nincs jármûbiztosítása...
             if (!model.PlayerCarInsurance(model.ActualPlayer))
             {
@@ -2156,12 +2371,38 @@ namespace GameOfLife
             if (model.PlayerStockCard(model.ActualPlayer) == 9)
             {
                 spriteBatch.Draw(buyStockBtn, new Rectangle(343, 743, 143, 53), Color.White);
+                spriteBatch.Draw(collegeImg, new Rectangle(850, 750, 57, 86), Color.White);
             }
+            else//T.SZ.
+            {
+                spriteBatch.Draw(stockes[model.PlayerStockCard(model.ActualPlayer)], new Rectangle(850, 750, 57, 86), Color.White);
+            }
+
             // Ha a játékosnak van hitele...
             if (model.PlayerLoan(model.ActualPlayer) != 0)
             {
                 spriteBatch.Draw(payBackLoanBtn, new Rectangle(526, 743, 143, 53), Color.White);
             }
+
+            //T.SZ.
+            if (model.PlayerCareerCard(model.ActualPlayer) == 9)
+            {
+                spriteBatch.Draw(careerImg, new Rectangle(771, 660, 57, 86), Color.White);
+            }
+            else
+            {
+                spriteBatch.Draw(careers[model.PlayerCareerCard(model.ActualPlayer)], new Rectangle(771, 660, 57, 86), Color.White);
+            }
+
+            if (model.PlayerSalaryCard(model.ActualPlayer) == 9)
+            {
+                spriteBatch.Draw(salaryImg, new Rectangle(850, 660, 57, 86), Color.White);
+            }
+            else
+            {
+                spriteBatch.Draw(salaries[model.PlayerSalaryCard(model.ActualPlayer)], new Rectangle(850, 660, 57, 86), Color.White);
+            }
+
             spriteBatch.Draw(spinBtn, new Rectangle(60, 680, 143, 97), Color.White);
 
             String playersName = model.PlayerName(model.ActualPlayer);
@@ -2173,7 +2414,7 @@ namespace GameOfLife
             String playersCard = model.PlayerLifeCardNumber(model.ActualPlayer).ToString();
             spriteBatch.DrawString(titleFont, playersCard, new Vector2(630, 595), Color.White);
 
-            spriteBatch.DrawString(titleFont, output.GetOutput(), new Vector2(10, 10), Color.White); //T.SZ. az output most már nem egy sima String, hanem egy osztály, aminek a GetOutput függvénye adja vissza a kiírandó szöveget
+            spriteBatch.DrawString(titleFont, output, new Vector2(10, 10), Color.White);
 
             if (model.PlayerGender(model.ActualPlayer))
             {
