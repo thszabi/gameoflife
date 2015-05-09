@@ -20,13 +20,13 @@ namespace GameOfLife.DataModel
         private List<Int32> _remainedPlayers;
         private Int32 _actualPlayer;
         private List<Int32> _rewardForLifeCards;
-        private List<String> _awardForLifeCards; //T.SZ.
+        private List<String> _awardForLifeCards;
         private readonly Int32[] _moneyForSalaryCards = { 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000 };
         private readonly Int32[] _taxForSalaryCards = { 5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000 };
 
         #region Get Game Data
 
-        public Int32 ActualPlayer { get{/* if (_remainedPlayers.Count > 0) */return _actualPlayer;/* return 0;/*-1;*/ } set { _actualPlayer = value; } } //T.SZ.
+        public Int32 ActualPlayer { get{ return _actualPlayer; } set { _actualPlayer = value; } }
         public Int32 NumberOfPlayers { get { return _playerNumber; } }
         public Boolean IsEveryoneRetired { get { return _remainedPlayers.Count == 0; } }
 
@@ -45,7 +45,6 @@ namespace GameOfLife.DataModel
             return _playerList[playerNum].careerCard;
         }
 
-        //T.SZ.
         /// <summary>
         /// Játékos fizetés kártyája
         /// </summary>
@@ -558,7 +557,6 @@ namespace GameOfLife.DataModel
             Int32 r = rnd.Next(_remainedCareerCards.Count);
             Int32 careerCard = _remainedCareerCards[r];
 
-            //T.SZ.
             while (!_playerList[playerNum].deg && careerCard >= 6) //amíg olyat kapunk, amihez diploma kell és nincs diplománk
             {
                 r = rnd.Next(_remainedCareerCards.Count);
@@ -742,7 +740,7 @@ namespace GameOfLife.DataModel
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
             if (sum < 0)
                 throw new ArgumentException("A pénzösszeg rosszul van megadva", "sum");
-            //T.SZ.
+
             while (_playerList[playerNum].money < sum)
             {
                 _playerList[playerNum].money += 20000;
@@ -829,7 +827,7 @@ namespace GameOfLife.DataModel
         {
             if (playerNum >= _playerList.Length)
                 throw new ArgumentException("Az aktuális játékos száma nagyobb, mint a játékosok száma", "playerNum");
-            //T.SZ.
+
             if (_playerList[playerNum].salaryCard != 9)
                 _remainedSalaryCards.Add(_playerList[playerNum].salaryCard);
             if (!_remainedSalaryCards.Contains(salaryNum))
@@ -891,7 +889,7 @@ namespace GameOfLife.DataModel
                 {
                     
                     owner = ExistCareer(5);
-                    police = (owner != -1); //T.SZ.
+                    police = (owner != -1);
                 }
                 catch (Exception)
                 {
@@ -962,7 +960,6 @@ namespace GameOfLife.DataModel
         /// <returns><c>0</c>, ha a mentés sikeres volt. <c>1</c>, ha a file már létezik. <c>2</c>, ha a mentés sikertelen volt.</returns>
         public Int32 Save(String filename, Boolean sure)
         {
-            //T.SZ.
             if (File.Exists(filename) && !sure)
                 return 1;
             try
@@ -998,7 +995,7 @@ namespace GameOfLife.DataModel
                 maxPlayer.Add(temp);
                 maxMoney = _playerList[temp].money;
 
-                for (int i = (temp+1); i < _playerNumber; i++) //T.SZ.
+                for (int i = (temp+1); i < _playerNumber; i++)
                 {
                     if (_playerList[i].retired == 2)
                     {
@@ -1020,12 +1017,11 @@ namespace GameOfLife.DataModel
 
                 foreach (int max in maxPlayer)
                 {
-                    _playerList[max].lifeCardNumber += 4 / maxPlayer.Count; //T.SZ.
+                    _playerList[max].lifeCardNumber += 4 / maxPlayer.Count;
                 }
             }
         }
 
-        //T.SZ.
         public Tuple<String, Int32> RevealLifeCard(Int32 playerNum)
         {
             if (_playerList[playerNum].lifeCardNumber <= 0)
@@ -1116,7 +1112,7 @@ namespace GameOfLife.DataModel
                 else
                     _rewardForLifeCards.Add(250000);
             }
-            //T.SZ.
+
             _awardForLifeCards = new List<String>();
 
             _awardForLifeCards.Add("Megnyered a táncversenyt");
@@ -1153,7 +1149,6 @@ namespace GameOfLife.DataModel
         /// <param name="filename">Fájl neve</param>
         public DataModel(String filename)
         {
-            //T.SZ.
             if (!File.Exists(filename))
                 throw new FileNotFoundException();
 
@@ -1172,7 +1167,7 @@ namespace GameOfLife.DataModel
             _remainedPlayers = fromFile._remainedPlayers;
             _actualPlayer = fromFile._actualPlayer;
             _rewardForLifeCards = fromFile._rewardForLifeCards;
-            _awardForLifeCards = fromFile._awardForLifeCards; //T.SZ.
+            _awardForLifeCards = fromFile._awardForLifeCards;
         }
 
         #endregion

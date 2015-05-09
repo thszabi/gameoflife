@@ -108,6 +108,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BoardGame.cs" />
+    <Compile Include="MiniGame.cs" />
+    <Compile Include="MiniGameComputerAI.cs" />
+    <Compile Include="MiniGameModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="GameOfLife.cs" />
